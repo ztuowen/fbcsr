@@ -5,7 +5,9 @@
 
 typedef struct csr {
     int n,m;
-    elem_t *ptr,*indx,*val;
+    int *ptr;       // Guarded
+    int *indx;
+    elem_t *val;
 } csr;
 
 #endif

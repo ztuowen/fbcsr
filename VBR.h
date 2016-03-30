@@ -16,5 +16,6 @@ typedef struct vbr {
 } vbr;
 
 int csr_vbr(csr *c,vbr *v,float thresh);
+int vbr_csr(vbr *v,csr *c);
 
 #endif
