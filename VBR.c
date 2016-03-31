@@ -1,5 +1,6 @@
 #include"VBR.h"
 #include"string.h"
+#include"assert.h"
 
 int condense(int *e,int *c_e,int len, float thresh, int **out)
 {
@@ -132,6 +133,8 @@ int vbr_csr(vbr *v,csr *c)
 {
     int cnt = v->indx[v->bptr[v->nr+1]];
     int i,vcnt;
+    c->n = v->n;
+    c->m = v->m;
     c->ptr = malloc((v->n+1)*sizeof(int));
     vcnt=0;
     for (i=0;i<cnt;++i)
