@@ -11,6 +11,8 @@ typedef struct ubcsr {
     int c,r;
     int nr;
     int *rptr;      // Integer array, storing the row partitioning information
+    void* optKernel; // Optimized kernel function, don't know if this is ok, but just use it for now
+                    // Null for default;
     elem_t *val;    // Scalar array, storing the values
     int *bindx;      // Integer array, storing the column indices of blocks
     int *bptr;      // Integer array; storing the pointer to the beginning of each block row

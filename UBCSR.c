@@ -2,6 +2,8 @@
 #include"VBR.h"
 #include<assert.h>
 
+typedef void (*ubcsrSingle_SpMVKernel)(ubcsr *u,vector *v, vector *r);
+
 csr* csr_splitOnce(csr *c,ubcsr *u, float thresh)
 {
     vbr *v = malloc(sizeof(vbr));
@@ -200,4 +202,35 @@ void ubcsr_destroy(void *u){
     safeFree(uu->val);
     safeFree(uu->bindx);
     safeFree(uu->bptr);
+}
+
+void ubcsrSingle_SpMV(ubcsr *u, vector *v, vector *r){
+    int i,j,k,l;
+    int indx =0;
+    assert(u->m == v->n);
+    assert(u->n == r->n);
+    for (i=0;i<u->nr;++i)
+        for (j=u->bptr[i];j<bptr[i+1];++j)
+        {
+            for (k=0;k<r;++k,++indx)
+                for (l=0;l<c;++l,++indx)
+                    r->val[k+u->rptr[i]] += v->val[l+u->bindx[j]] * u->val[indx];
+        }
+}
+
+void ubcsr_SpMV(list *l, csr *rem, vector *v, vector *r){
+    ubcsr *u;
+    csr_SpMV(rem,v,r);
+    while (l!=NULL)
+    {
+        u = (ubcsr *)list_get(l);
+        if (u->optKernel==NULL)
+            ubcsrSingle_SpMV(u,v,r);
+        else
+        {
+            ubcsrSingle_SpMVKernel krnl = (ubcsrSingle_SpMVKernel) u->optKernel;
+            krnl(u,v,r);
+        }
+        l = list_next(l);
+    }
 }

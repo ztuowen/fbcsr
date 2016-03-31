@@ -1,5 +1,6 @@
 #include"CSR.h"
 #include"string.h"
+#include"assert.h"
 
 void csr_destroy(void* c)
 {
@@ -66,4 +67,13 @@ void csr_merge(csr *a, csr *b)
     a->ptr = ptr;
     a->indx = indx;
     a->val = val;
+}
+
+void csr_SpMV(csr *m, vector *v, vector *r){
+    assert(m->m == v->n);
+    assert(m->n == r->m);
+    int i,j;
+    for (i = 0; i<m->n;++i)
+        for (j=m->ptr[i];j<m->ptr[i+1];++j)
+            r->val[i] += v->val[m->indx[j]] * m->val[j];
 }
