@@ -17,5 +17,6 @@ typedef struct vbr {
 
 int csr_vbr(csr *c,vbr *v,float thresh);
 int vbr_csr(vbr *v,csr *c);
+void vbr_destroy(void* v);   // vbr might not be a pointer
 
 #endif

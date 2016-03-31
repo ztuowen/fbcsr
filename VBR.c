@@ -159,3 +159,14 @@ int vbr_csr(vbr *v,csr *c)
         c->indx[v->rptr[i]+r+1] = vcnt;
     }
 }
+
+void vbr_destroy(void* v)
+{
+    vbr *vv=(vbr*) v;
+    free(vv->rptr);
+    free(vv->cptr);
+    free(vv->val);
+    free(vv->indx);
+    free(vv->bindx);
+    free(vv->bptr);
+}

@@ -10,4 +10,6 @@ typedef struct csr {
     elem_t *val;
 } csr;
 
+void csr_destroy(csr c);
+
 #endif
