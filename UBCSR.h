@@ -4,6 +4,7 @@
 #include "prefix.h"
 #include "CSR.h"
 #include "list.h"
+#include "vector.h"
 
 typedef struct ubcsr {
     int n,m;
@@ -19,5 +20,6 @@ csr* csr_ubcsr(csr *c,list *l,float thresh);    // c,r information embedded in l
                                                 // Easier to just return the remainder, TODO it is against convention
 void ubcsr_csr(list *l, csr *rem,csr *c);
 void ubcsr_destroy(void* u);
+void ubcsr_SpMV(list *l, csr *rem,vector *v, vector *r);
 
 #endif

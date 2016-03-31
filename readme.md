@@ -14,6 +14,7 @@ Only a whole bunch of files floating around
     * CSR.c/.h `own representation of CSR`
     * VBR.c/.h `VBR and converters between CSR format`
     * UBCSR.c/.h `UBSCR and converters between CSR format`
+    * vector.c/.h `some vector functions for easier implementation`
 
 **Needs**
 
