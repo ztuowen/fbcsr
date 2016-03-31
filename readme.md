@@ -10,6 +10,13 @@ Only a whole bunch of files floating around
 
 * /
     * prefix.h `global definitions and helpers`
+    * list.c/.h `list structure for c` thinking there might be a standard library somewhere...
     * CSR.c/.h `own representation of CSR`
     * VBR.c/.h `VBR and converters between CSR format`
-    * *future* UBCSR.c/.h `UBSCR and converters between CSR format`
+    * UBCSR.c/.h `UBSCR and converters between CSR format`
+
+**Needs**
+
+* Test
+* respective SpMV
+* Main file
