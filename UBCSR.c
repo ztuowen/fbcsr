@@ -4,7 +4,6 @@
 
 csr* csr_splitOnce(csr *c,ubcsr *u, float thresh)
 {
-    // TODO implement!
     vbr *v = malloc(sizeof(vbr));
     csr *rem = malloc(sizeof(csr));
     int i,j,k,lk;
@@ -124,4 +123,81 @@ csr* csr_ubcsr(csr *c,list *l,float thresh)
     }
 
     return last;
+}
+
+csr* ubcsrSingle_csr(ubcsr *u){
+    csr *c;
+    c->n = u->n;
+    c->m = u->m;
+    int cnt = u->bptr[u->nr]*u->c*u->r;
+    int i,vcnt;
+    // Count
+    vcnt=0;
+    for (i=0;i<cnt;++i)
+        if (u->val[i]!=0)
+            ++vcnt;
+    // Malloc
+    c->val = malloc(vcnt*sizeof(elem_t));
+    c->indx = malloc(vcnt*sizeof(int));
+
+    // Fill
+    int row=0;
+    for (i=0;i<u->nr;++i)
+    {
+        for (j=0;j<u->r;++j) // row
+        {
+            int offset = j*u->c;
+            int col;
+            // write to ptr
+            while (row<j+u->rptr[i]){
+                c->ptr[row] = cnt;
+                ++row;
+            }
+            // write to indx & val
+            for (k=u->bptr[i];k<u->bptr[i+1];++k)
+            {
+                for (col=0;col<u->c;++col)
+                    if (u->val[u->c*u->r*k+offset+col]!=0)
+                    {
+                        c->val[cnt] = u->val[u->c*u->r*k+offset+col];
+                        c->indx[cnt] = u->bindx[k]+col;
+                        ++cnt;
+                    }
+            }
+        }
+    }
+    while (row<c->n){
+        c->ptr[row] = cnt;
+        ++row;
+    }
+    c->ptr[row] = cnt;
+    return c;
+}
+
+void ubcsr_csr(list *l,csr *rem,csr *c)
+{
+    ubcsr *u;
+    csr *tmp;
+    csr_makeEmpty(c,rem->n,rem->m);
+    csr_merge(c,rem);
+    while (l!=NULL)
+    {
+        u = (ubcsr*) list_get(l);
+        
+        tmp = ubcsrSingle_csr(u);
+        csr_merge(c,tmp);
+
+        // clean up & next
+        csr_destroy(tmp);
+        free(tmp);
+        l = list_next(l);
+    }
+}
+
+void ubcsr_destroy(void *u){
+    ubcsr *uu = (ubcsr*) u;
+    safeFree(uu->rptr);
+    safeFree(uu->val);
+    safeFree(uu->bindx);
+    safeFree(uu->bptr);
 }

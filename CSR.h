@@ -10,6 +10,8 @@ typedef struct csr {
     elem_t *val;
 } csr;
 
-void csr_destroy(csr c);
+void csr_destroy(void* c);
+void csr_merge(csr *a, csr *b); // a=a+b also be used for deepcopy
+void csr_makeEmpty(csr *a,int n,int m);
 
 #endif

@@ -16,7 +16,8 @@ typedef struct ubcsr {
 } ubcsr;
 
 csr* csr_ubcsr(csr *c,list *l,float thresh);    // c,r information embedded in list of ubcsr
-                                                // Easier to just return the remainder
+                                                // Easier to just return the remainder, TODO it is against convention
+void ubcsr_csr(list *l, csr *rem,csr *c);
 void ubcsr_destroy(void* u);
 
 #endif
