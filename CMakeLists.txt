@@ -16,4 +16,6 @@ set(SOURCE_FILES
         lib/vector.c
         lib/vector.h)
 
-add_executable(matrixRep ${SOURCE_FILES})
+include_directories(lib)
+
+add_executable(testcases ${SOURCE_FILES} testcases.c)

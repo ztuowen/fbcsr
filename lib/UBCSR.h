@@ -18,8 +18,9 @@ typedef struct ubcsr {
     int *bptr;      // Integer array; storing the pointer to the beginning of each block row
 } ubcsr;
 
+typedef void (*ubcsrSingle_SpMVKernel)(ubcsr *u, vector *v, vector *r);
 
-ubcsr *ubcsr_makeEmpty(int n, int m, int c, int r, void *optKrnl);
+void ubcsr_makeEmpty(ubcsr *u,int n, int m, int c, int r, void *optKrnl);
 
 csr *csr_ubcsr(csr *c, list *l, float thresh);    // c,r information embedded in list of ubcsr
 // Easier to just return the remainder, TODO it is against convention

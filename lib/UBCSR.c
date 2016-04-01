@@ -2,8 +2,6 @@
 #include "VBR.h"
 #include<assert.h>
 
-typedef void (*ubcsrSingle_SpMVKernel)(ubcsr *u, vector *v, vector *r);
-
 csr *csr_splitOnce(csr *c, ubcsr *u, float thresh) {
     vbr *v = malloc(sizeof(vbr));
     csr *rem = malloc(sizeof(csr));
@@ -214,14 +212,10 @@ void ubcsr_SpMV(list *l, csr *rem, vector *v, vector *r) {
     }
 }
 
-ubcsr *ubcsr_makeEmpty(int n, int m, int c, int r, void *optKrnl) {
-    ubcsr *u = malloc(sizeof(ubcsr));
-
+void ubcsr_makeEmpty(ubcsr *u,int n, int m, int c, int r, void *optKrnl) {
     u->n = n;
     u->m = m;
     u->c = c;
     u->r = r;
     u->optKernel = optKrnl;
-
-    return u;
 }
