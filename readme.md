@@ -20,3 +20,15 @@ Only a whole bunch of files floating around
 
 * Debuging & Test -- a lots of it
 * Main file
+
+# To compile
+
+1. clone this repository using git.
+2. build using cmake
+    1. `cd` to source directory
+    1. `mkdir Release`
+    2. `cd Release`
+    3. `cmake -DCMAKE_BUILD_TYPE=Release ..`
+    4. `make`
+
+**Can also change Release for Debug**
