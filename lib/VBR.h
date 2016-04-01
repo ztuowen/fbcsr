@@ -1,11 +1,11 @@
-#ifndef _VBR_H
-#define _VBR_H
+#ifndef VBR_H
+#define VBR_H
 
 #include"CSR.h"
 #include"prefix.h"
 
 typedef struct vbr {
-    int n,m;
+    int n, m;
     int nr;
     int *rptr;  //Integer array. It contains the block row partitioning information--that is, the first row number of each block row.
     int *cptr;  //Integer array. It contains the block column partitioning information--that is, the first column number of each block column.
@@ -15,8 +15,10 @@ typedef struct vbr {
     int *bptr;  //Integer array. It contains the pointers to the beginning of each block row in bindx and val.
 } vbr;
 
-int csr_vbr(csr *c,vbr *v,float thresh);
-int vbr_csr(vbr *v,csr *c);
-void vbr_destroy(void* v);   // vbr might not be a pointer
+void csr_vbr(csr *c, vbr *v, float thresh);
+
+void vbr_csr(vbr *v, csr *c);
+
+void vbr_destroy(void *v);   // vbr might not be a pointer
 
 #endif

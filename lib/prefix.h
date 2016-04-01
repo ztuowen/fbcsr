@@ -1,5 +1,7 @@
-#ifndef _PREFIX_H
-#define _PREFIX_H
+#ifndef PREFIX_H
+#define PREFIX_H
+
+#include<stdlib.h>
 
 #define safeFree(x) {if (x) free(x);}
 
