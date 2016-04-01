@@ -5,22 +5,22 @@
 #include<assert.h>
 
 
-void load_sparse_matrix(char *filename, csr *c) {
+void csr_readFile(char *filename, csr *c) {
     FILE *in;
     char data[1024];
     int i;
     int ret;
     int nnz;
-    char *tmp;
     in = fopen(filename, "r");
     if (in == NULL) {
         printf("something might be wrong with the file\n");
     }
-    tmp = fgets(data, 1024, in);
+    fgets(data, 1024, in);
     fprintf(stderr, "%s", data);    // TODO What is this fprintf for, Debugging?
     ret = fscanf(in, "%d %d %d\n", &(c->n), &(c->m), &nnz); // TODO I just ignore nnz for now
+    assert(ret == 3);
     if (DEBUG)
-        fprintf(stderr, "load_sparse_matrix:: rows = %d, cols= %d nnz = %d\n", A->nrows, A->ncols, nnz);
+        fprintf(stderr, "load_sparse_matrix:: rows = %d, cols= %d nnz = %d\n", c->n, c->m, nnz);
 
     c->ptr = (int *) malloc(sizeof(int) * ((c->n) + 1));
     c->indx = (int *) malloc(sizeof(int) * (c->m));
@@ -31,6 +31,7 @@ void load_sparse_matrix(char *filename, csr *c) {
     for (i = 0; i <= c->n; i++) {
         int temp;
         ret = fscanf(in, "%d", &temp);
+        assert(ret == 1);
         --temp;
         c->ptr[i] = temp;
 
@@ -43,6 +44,7 @@ void load_sparse_matrix(char *filename, csr *c) {
     for (i = 0; i < nnz; i++) {
         int temp;
         ret = fscanf(in, "%d", &temp);
+        assert(ret == 1);
         temp--;
         c->indx[i] = temp;
         assert(temp>=0);
@@ -58,6 +60,7 @@ void load_sparse_matrix(char *filename, csr *c) {
 #else
         ret = fscanf(in, "%d", &(c->val[i]));
 #endif
+        assert(ret == 1);
     }
 
     if (DEBUG)

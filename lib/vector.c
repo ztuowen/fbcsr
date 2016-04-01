@@ -17,7 +17,7 @@ int vector_equal(vector *a, vector *b) {
     return 1;
 }
 
-int vector_init(vector *v, int n) {
+void vector_init(vector *v, int n) {
     v->n = n;
     v->val = malloc(n * sizeof(elem_t));
     for (int i = 0; i < n; ++i)
