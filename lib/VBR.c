@@ -1,18 +1,20 @@
 #include "VBR.h"
 #include"string.h"
 #include"assert.h"
+#include"stdio.h"
 
 int condense(int *e, int *c_e, int len, float thresh, int **out) {
-    int cnt = len, j = 0;
+    int cnt = len+1, j = 0;
     for (int i = 1; i < len; ++i)
         if (e[i] * e[i - 1] >= thresh * c_e[i] * c_e[i - 1])
             --cnt;
     *out = malloc(cnt * sizeof(int));
-    *out[0] = 0;
+    (*out)[0] = 0;
     for (int i = 1; i < len; ++i)
-        if (e[i] * e[i - 1] < thresh * c_e[i] * c_e[i - 1])
-            *out[++j] = i;
-    *out[++j] = len;
+        if (e[i] * e[i - 1] < thresh * c_e[i] * c_e[i - 1]) {
+            (*out)[++j] = i;
+        }
+    (*out)[j+1] = len;
     return cnt - 1;
 }
 
@@ -41,9 +43,10 @@ void csr_vbr(csr *c, vbr *v, float thresh) {
             // Check similarity with last row
             if (c->indx[j] == lk + 1)
                 ++col[c->indx[j]];
+            lk = c->indx[j];
             while (lj < c->ptr[i] && c->indx[lj] < c->indx[j])
                 ++lj;
-            if (lj < c->ptr[i] && c->indx[lj] < c->indx[j])
+            if (lj < c->ptr[i] && c->indx[lj] == c->indx[j])
                 ++row[i];
         }
         lj = c->ptr[i];
@@ -53,12 +56,11 @@ void csr_vbr(csr *c, vbr *v, float thresh) {
     v->bptr = malloc(nr * sizeof(int));
     // condense column
     nc = condense(col, k_col, v->m, thresh, &(v->cptr));
-
     int cnt = 0; // The total number of elements needs to be added
     int bcnt = 0;   // The total number of blocks
     v->bptr[0] = 0;
     for (i = 0; i < nr; ++i) {
-        memset(col, 0, nc * sizeof(int));
+        memset(col, 0, (nc+1) * sizeof(int));
         for (j = v->rptr[i]; j < v->rptr[i + 1]; ++j) // j is the row
         {
             lk = 1;
@@ -84,7 +86,7 @@ void csr_vbr(csr *c, vbr *v, float thresh) {
     // Finally the constructing part
     cnt = 0;    // val counter
     for (i = 0; i < nr; ++i) {
-        memset(col, 0, nc * sizeof(int));
+        memset(col, 0, (nc+1) * sizeof(int));
         for (j = v->rptr[i]; j < v->rptr[i + 1]; ++j) // j is the row
         {
             lk = 1;
@@ -94,25 +96,25 @@ void csr_vbr(csr *c, vbr *v, float thresh) {
             }
         }
         lj = v->bptr[i];
-        for (j = 1; j < nc; ++j)
+        for (j = 1; j <= nc; ++j)
             if (col[j]) {
-                v->bindx[lj] = v->cptr[j - 1];
+                v->bindx[lj] = j - 1;
                 v->indx[lj] = cnt;
                 col[j] = lj;
+                for (int kj = v->rptr[i]; kj < v->rptr[i + 1]; ++kj) // kj is the row
+                {
+                    for (lk = c->ptr[kj]; lk < c->ptr[kj + 1] && c->indx[lk] < v->cptr[j]; ++lk)
+                        if (c->indx[lk] >= v->cptr[j-1]) {
+                            bcnt = cnt + (c->indx[lk] - v->cptr[j - 1]) + (kj - v->rptr[i]) * (v->cptr[j] - v->cptr[j - 1]); //index
+                            v->val[bcnt] = c->val[lk];
+                        }
+                }
                 cnt += (v->cptr[j] - v->cptr[j - 1]) * (v->rptr[i + 1] - v->rptr[i]);
                 ++lj;
             }
         assert(lj == v->bptr[i + 1]);
-        for (j = v->rptr[i]; j < v->rptr[i + 1]; ++j) // j is the row
-        {
-            lk = 1;
-            for (lj = c->ptr[j]; lj < c->ptr[j + 1]; ++lj) {
-                while (v->cptr[lk] <= c->indx[lj])++lk;
-                bcnt = (c->indx[lj] - v->cptr[lk - 1]) + (j - v->rptr[i]) * (v->cptr[lk] - v->cptr[lk - 1]); //index
-                v->val[bcnt] = c->val[lj];
-            }
-        }
     }
+    v->indx[lj]=cnt;
     // Thus we should have all
     free(k_row);
     free(row);
@@ -121,7 +123,7 @@ void csr_vbr(csr *c, vbr *v, float thresh) {
 }
 
 void vbr_csr(vbr *v, csr *c) {
-    int cnt = v->indx[v->bptr[v->nr + 1]];
+    int cnt = v->indx[v->bptr[v->nr]];
     int i, vcnt, r, j, k;
     c->n = v->n;
     c->m = v->m;
@@ -133,10 +135,10 @@ void vbr_csr(vbr *v, csr *c) {
     c->val = malloc(vcnt * sizeof(elem_t));
     c->indx = malloc(vcnt * sizeof(int));
     vcnt = 0;
-    c->indx[0] = 0;
+    c->ptr[0] = 0;
     for (i = 0; i < v->nr; ++i) {
-        for (r = 0; r < v->rptr[i + 1] - v->rptr[i]; ++r)
-            for (j = v->bptr[i]; j < v->bptr[i]; ++j) {
+        for (r = 0; r < v->rptr[i + 1] - v->rptr[i]; ++r){
+            for (j = v->bptr[i]; j < v->bptr[i+1]; ++j) {
                 int cc = v->bindx[j];
                 int col = v->cptr[cc + 1] - v->cptr[cc];
                 for (k = 0; k < col; ++k)
@@ -146,7 +148,8 @@ void vbr_csr(vbr *v, csr *c) {
                         ++vcnt;
                     }
             }
-        c->indx[v->rptr[i] + r + 1] = vcnt;
+            c->ptr[v->rptr[i] + r + 1] = vcnt;
+        }
     }
 }
 

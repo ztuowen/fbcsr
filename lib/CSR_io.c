@@ -1,7 +1,5 @@
 #include "CSR.h"
 #include <stdio.h>
-#include <stdlib.h>
-#include<string.h>
 #include<assert.h>
 
 
@@ -16,14 +14,14 @@ void csr_readFile(char *filename, csr *c) {
         printf("something might be wrong with the file\n");
     }
     fgets(data, 1024, in);
-    fprintf(stderr, "%s", data);    // TODO What is this fprintf for, Debugging?
+    printf("Matrix: %s", data);    // TODO What is this fprintf for, Debugging?
     ret = fscanf(in, "%d %d %d\n", &(c->n), &(c->m), &nnz); // TODO I just ignore nnz for now
     assert(ret == 3);
     if (DEBUG)
         fprintf(stderr, "load_sparse_matrix:: rows = %d, cols= %d nnz = %d\n", c->n, c->m, nnz);
 
     c->ptr = (int *) malloc(sizeof(int) * ((c->n) + 1));
-    c->indx = (int *) malloc(sizeof(int) * (c->m));
+    c->indx = (int *) malloc(sizeof(int) * nnz);
     c->val = malloc(sizeof(elem_t) * nnz);
     if (DEBUG)
         fprintf(stderr, "load_sparse_matrix::reading row index\n");
