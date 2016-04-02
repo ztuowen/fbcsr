@@ -129,17 +129,18 @@ csr *ubcsrSingle_csr(ubcsr *u) {
     // Malloc
     c->val = malloc(vcnt * sizeof(elem_t));
     c->indx = malloc(vcnt * sizeof(int));
-    c->ptr = malloc((u->n+1) * sizeof(int));
+    c->ptr = malloc((u->n + 1) * sizeof(int));
 
     // Fill
     int row = 0;
+    cnt = 0;
     for (i = 0; i < u->nr; ++i) {
         for (j = 0; j < u->r; ++j) // row
         {
             int offset = j * u->c;
             int col;
             // write to ptr
-            while (row < j + u->rptr[i]) {
+            while (row <= j + u->rptr[i]) {
                 c->ptr[row] = cnt;
                 ++row;
             }
@@ -154,11 +155,10 @@ csr *ubcsrSingle_csr(ubcsr *u) {
             }
         }
     }
-    while (row < c->n) {
+    while (row <= c->n) {
         c->ptr[row] = cnt;
         ++row;
     }
-    c->ptr[row] = cnt;
     return c;
 }
 
@@ -195,7 +195,7 @@ void ubcsrSingle_SpMV(ubcsr *u, vector *v, vector *r) {
     assert(u->n == r->n);
     for (i = 0; i < u->nr; ++i)
         for (j = u->bptr[i]; j < u->bptr[i + 1]; ++j) {
-            for (k = 0; k < u->r; ++k, ++indx)
+            for (k = 0; k < u->r; ++k)
                 for (l = 0; l < u->c; ++l, ++indx)
                     r->val[k + u->rptr[i]] += v->val[l + u->bindx[j]] * u->val[indx];
         }
@@ -216,7 +216,7 @@ void ubcsr_SpMV(list *l, csr *rem, vector *v, vector *r) {
     }
 }
 
-void ubcsr_makeEmpty(ubcsr *u,int n, int m, int c, int r, void *optKrnl) {
+void ubcsr_makeEmpty(ubcsr *u, int n, int m, int c, int r, void *optKrnl) {
     u->n = n;
     u->m = m;
     u->c = c;

@@ -20,8 +20,8 @@ void list_destroy(list *l, void (*destory)(void *d)) {
     void *dat;
     while (l != NULL) {
         nl = l;
-        l = l->nxt;
-        dat = list_get(l);
+        l = list_next(l);
+        dat = list_get(nl);
         if (destory != NULL)
             destory(dat);
         free(dat);

@@ -12,9 +12,11 @@ typedef struct csr {
 } csr;
 
 void csr_destroy(void *c);
+
 void csr_readFile(char *filename, csr *c);
 
 void csr_merge(csr *a, csr *b); // a=a+b also be used for deepcopy
+
 void csr_makeEmpty(csr *c, int n, int m);
 
 void csr_SpMV(csr *m, vector *v, vector *r);

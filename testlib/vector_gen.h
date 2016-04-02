@@ -8,6 +8,6 @@
 #include"prefix.h"
 #include"vector.h"
 
-void vector_gen_random(vector *v,int n, elem_t (*random)(void));
+void vector_gen_random(vector *v, int n, elem_t (*random)(void));
 
 #endif //MATRIXREP_RANDOM_GEN_H_H

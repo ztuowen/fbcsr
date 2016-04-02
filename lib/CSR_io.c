@@ -33,7 +33,7 @@ void csr_readFile(char *filename, csr *c) {
         --temp;
         c->ptr[i] = temp;
 
-        assert(temp<=nnz);
+        assert(temp <= nnz);
     }
 
     if (DEBUG)
@@ -45,7 +45,7 @@ void csr_readFile(char *filename, csr *c) {
         assert(ret == 1);
         temp--;
         c->indx[i] = temp;
-        assert(temp>=0);
+        assert(temp >= 0);
     }
 
     if (DEBUG)

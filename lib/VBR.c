@@ -4,7 +4,7 @@
 #include"stdio.h"
 
 int condense(int *e, int *c_e, int len, float thresh, int **out) {
-    int cnt = len+1, j = 0;
+    int cnt = len + 1, j = 0;
     for (int i = 1; i < len; ++i)
         if (e[i] > thresh * c_e[i] * c_e[i - 1])
             --cnt;
@@ -14,7 +14,7 @@ int condense(int *e, int *c_e, int len, float thresh, int **out) {
         if (e[i] <= thresh * c_e[i] * c_e[i - 1]) {
             (*out)[++j] = i;
         }
-    (*out)[j+1] = len;
+    (*out)[j + 1] = len;
     return cnt - 1;
 }
 
@@ -25,7 +25,7 @@ void csr_vbr(csr *c, vbr *v, float thresh) {
     v->n = c->n;
     v->m = c->m;
     k_col = malloc(v->m * sizeof(int));
-    col = malloc((v->m+1) * sizeof(int));
+    col = malloc((v->m + 1) * sizeof(int));
     k_row = malloc(v->n * sizeof(int));
     row = malloc(v->n * sizeof(int));
     memset(k_col, 0, v->m * sizeof(int));
@@ -53,14 +53,14 @@ void csr_vbr(csr *c, vbr *v, float thresh) {
     }
     // condense row
     nr = v->nr = condense(row, k_row, v->n, thresh, &(v->rptr));
-    v->bptr = malloc((nr+1) * sizeof(int));
+    v->bptr = malloc((nr + 1) * sizeof(int));
     // condense column
     nc = condense(col, k_col, v->m, thresh, &(v->cptr));
     int cnt = 0; // The total number of elements needs to be added
     int bcnt = 0;   // The total number of blocks
     v->bptr[0] = 0;
     for (i = 0; i < nr; ++i) {
-        memset(col, 0, (nc+1) * sizeof(int));
+        memset(col, 0, (nc + 1) * sizeof(int));
         for (j = v->rptr[i]; j < v->rptr[i + 1]; ++j) // j is the row
         {
             lk = 1;
@@ -86,7 +86,7 @@ void csr_vbr(csr *c, vbr *v, float thresh) {
     // Finally the constructing part
     cnt = 0;    // val counter
     for (i = 0; i < nr; ++i) {
-        memset(col, 0, (nc+1) * sizeof(int));
+        memset(col, 0, (nc + 1) * sizeof(int));
         for (j = v->rptr[i]; j < v->rptr[i + 1]; ++j) // j is the row
         {
             lk = 1;
@@ -104,8 +104,9 @@ void csr_vbr(csr *c, vbr *v, float thresh) {
                 for (int kj = v->rptr[i]; kj < v->rptr[i + 1]; ++kj) // kj is the row
                 {
                     for (lk = c->ptr[kj]; lk < c->ptr[kj + 1] && c->indx[lk] < v->cptr[j]; ++lk)
-                        if (c->indx[lk] >= v->cptr[j-1]) {
-                            bcnt = cnt + (c->indx[lk] - v->cptr[j - 1]) + (kj - v->rptr[i]) * (v->cptr[j] - v->cptr[j - 1]); //index
+                        if (c->indx[lk] >= v->cptr[j - 1]) {
+                            bcnt = cnt + (c->indx[lk] - v->cptr[j - 1]) +
+                                   (kj - v->rptr[i]) * (v->cptr[j] - v->cptr[j - 1]); //index
                             v->val[bcnt] = c->val[lk];
                         }
                 }
@@ -114,7 +115,7 @@ void csr_vbr(csr *c, vbr *v, float thresh) {
             }
         assert(lj == v->bptr[i + 1]);
     }
-    v->indx[lj]=cnt;
+    v->indx[lj] = cnt;
     // Thus we should have all
     free(k_row);
     free(row);
@@ -137,8 +138,8 @@ void vbr_csr(vbr *v, csr *c) {
     vcnt = 0;
     c->ptr[0] = 0;
     for (i = 0; i < v->nr; ++i) {
-        for (r = 0; r < v->rptr[i + 1] - v->rptr[i]; ++r){
-            for (j = v->bptr[i]; j < v->bptr[i+1]; ++j) {
+        for (r = 0; r < v->rptr[i + 1] - v->rptr[i]; ++r) {
+            for (j = v->bptr[i]; j < v->bptr[i + 1]; ++j) {
                 int cc = v->bindx[j];
                 int col = v->cptr[cc + 1] - v->cptr[cc];
                 for (k = 0; k < col; ++k)
