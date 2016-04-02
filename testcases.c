@@ -16,7 +16,6 @@
 csr *c;
 vector *vec;
 vector *ref;
-list *u;
 
 typedef void (*testFunc)(void);
 
@@ -134,4 +133,5 @@ int main() {
     free(vec);
     vector_destroy(ref);
     free(ref);
+    return 0;
 }

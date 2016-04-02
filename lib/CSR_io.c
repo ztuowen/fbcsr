@@ -14,7 +14,7 @@ void csr_readFile(char *filename, csr *c) {
         printf("something might be wrong with the file\n");
     }
     fgets(data, 1024, in);
-    printf("Matrix: %s", data);    // TODO What is this fprintf for, Debugging?
+    printf("Matrix: %s", data);
     ret = fscanf(in, "%d %d %d\n", &(c->n), &(c->m), &nnz); // TODO I just ignore nnz for now
     assert(ret == 3);
     if (DEBUG)

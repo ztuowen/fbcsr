@@ -1,7 +1,10 @@
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 2.8)
 project(matrixRep)
 
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Werror")
+find_package(CUDA)
+set(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS})
+
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -std=c99")
 
 set(SOURCE_FILES
         lib/CSR.c
@@ -16,3 +19,4 @@ set(TEST_FILES testlib/vector_gen.c)
 include_directories(lib)
 
 add_executable(testcases testcases.c ${SOURCE_FILES} ${TEST_FILES})
+cuda_add_executable(cudaSample cudaSample.cu)
