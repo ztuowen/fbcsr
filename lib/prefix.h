@@ -8,7 +8,7 @@
 #define safeFree(x) {if (x) free(x);}
 
 #define USE_FLOAT
-//#define DEBUG
+#define DEBUG
 
 
 // Only if support vargs in macros can this work

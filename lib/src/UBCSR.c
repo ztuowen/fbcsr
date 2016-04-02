@@ -1,7 +1,5 @@
-#include "UBCSR.h"
-#include "VBR.h"
-#include<assert.h>
-#include<stdio.h>
+#include "../UBCSR.h"
+#include "../VBR.h"
 
 csr *csr_splitOnce(csr *c, ubcsr *u, float thresh) {
     vbr *v = malloc(sizeof(vbr));

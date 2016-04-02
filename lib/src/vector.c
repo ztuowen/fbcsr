@@ -1,4 +1,4 @@
-#include "vector.h"
+#include "../vector.h"
 #include<math.h>
 
 int vector_equal(vector *a, vector *b) {

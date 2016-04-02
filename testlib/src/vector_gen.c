@@ -2,8 +2,8 @@
 // Created by joe on 4/1/16.
 //
 
-#include"vector_gen.h"
-#include"time.h"
+#include "../vector_gen.h"
+#include<time.h>
 
 #define DEFAULT_RNG 30
 

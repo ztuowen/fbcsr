@@ -6,18 +6,19 @@ set(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS})
 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -std=c99")
 
-set(SOURCE_FILES
-        lib/CSR.c
-        lib/CSR_io.c
-        lib/list.c
-        lib/UBCSR.c
-        lib/VBR.c
-        lib/vector.c)
+set(LIB_FILES
+        lib/src/CSR.c
+        lib/src/CSR_io.c
+        lib/src/list.c
+        lib/src/UBCSR.c
+        lib/src/VBR.c
+        lib/src/vector.c)
 
-set(TEST_FILES testlib/vector_gen.c)
+set(TESTLIB_FILES testlib/src/vector_gen.c)
 
 include_directories(lib)
 
-add_executable(testcases testcases.c ${SOURCE_FILES} ${TEST_FILES})
+add_executable(testcases testcases.c ${LIB_FILES} ${TESTLIB_FILES})
+
 cuda_add_executable(cudaSample cudaSample.cu)
-CUDA_ADD_CUBLAS_TO_TARGET( cudaSample )
+cuda_add_cublas_to_target( cudaSample )

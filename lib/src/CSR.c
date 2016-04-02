@@ -1,6 +1,5 @@
-#include "CSR.h"
-#include"string.h"
-#include"assert.h"
+#include "../CSR.h"
+#include<string.h>
 
 void csr_destroy(void *c) {
     csr *cc = (csr *) c;

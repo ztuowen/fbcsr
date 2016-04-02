@@ -1,7 +1,4 @@
-#include "CSR.h"
-#include <stdio.h>
-#include<assert.h>
-
+#include "../CSR.h"
 
 void csr_readFile(char *filename, csr *c) {
     FILE *in;

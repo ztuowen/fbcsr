@@ -1,6 +1,5 @@
-#include "VBR.h"
-#include"string.h"
-#include"assert.h"
+#include "../VBR.h"
+#include<string.h>
 
 int condense(int *e, int *c_e, int len, float thresh, int **out) {
     int cnt = len + 1, j = 0;

@@ -1,4 +1,4 @@
-#include "list.h"
+#include "../list.h"
 
 list *list_add(list *l, void *d) {
     list *nl = malloc(sizeof(list));

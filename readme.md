@@ -12,20 +12,40 @@
 
 # File structure
 
-* lib
-    * prefix.h `global definitions and helpers`
-    * list.c/.h `list structure for c` thinking there might be a standard library somewhere...
-    * CSR.c/.h `own representation of CSR`
-    * VBR.c/.h `VBR and converters between CSR format`
-    * UBCSR.c/.h `UBSCR and converters between CSR format`
-    * vector.c/.h `some vector functions for easier implementation`
-* testlib `libs related with testing`
-    * test_prefix.h `global definition for tests`
-    * vector_gen.c/.h `Random vector generator`
-* CMakeLists.txt `CMake makefile`
-* testcases.c `Some coherency tests`
-* readme.md `This file`
-* cudaSample.cu `A simple device query CUDA sample to showcase the build system for CUDA`
+* **lib/** libs for different matrix representations
+    * **src/** implementations
+    * **prefix.h** global definitions and helpers
+    * **list.h** list structure for c
+    * **CSR.h** own representation of CSR
+    * **VBR.h** VBR and converters between CSR format
+    * **UBCSR.h** UBSCR and converters between CSR format
+    * **vector.h** some vector functions for easier implementation
+* **testlib/** libs related with testing
+    * **src/** implementations
+    * **test_prefix.h** global definition for tests
+    * **vector_gen.h** Random vector generator
+* **CMakeLists.txt** CMake makefile
+* **testcases.c** Some coherency tests
+* **readme.md** This file
+* **cudaSample.cu** A simple device query CUDA sample to showcase the build system for CUDA
+
+## Guidelines
+
+**To implement a new public interface**: 
+
+1. add the function declaration in respective .h file
+2. implementation writen in `src/` folder and quote the .h file using `#include"../XXXX.h"`
+
+**To write a new test**:
+
+1. write the test function in `testcases.c` as a `void func(void)`
+2. add the test description to `tNames` and the function to `tFuncs`
+
+**To use debug print**:
+
+* `DEBUG_PRINT(...)` works the same way as `fprintf(stderr,...)`
+    * will be disabled `#ifndef DEBUG`
+    * will be disabled when building as Release
 
 # Using CUDA
 
