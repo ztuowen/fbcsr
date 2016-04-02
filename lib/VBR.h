@@ -19,6 +19,8 @@ void csr_vbr(csr *c, vbr *v, float thresh);
 
 void vbr_csr(vbr *v, csr *c);
 
+void vbr_SpMV(vbr *m, vector *v, vector *r);
+
 void vbr_destroy(void *v);   // vbr might not be a pointer
 
 #endif

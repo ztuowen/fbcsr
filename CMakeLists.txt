@@ -20,3 +20,4 @@ include_directories(lib)
 
 add_executable(testcases testcases.c ${SOURCE_FILES} ${TEST_FILES})
 cuda_add_executable(cudaSample cudaSample.cu)
+CUDA_ADD_CUBLAS_TO_TARGET( cudaSample )

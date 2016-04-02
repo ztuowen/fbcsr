@@ -1,7 +1,6 @@
 #include "VBR.h"
 #include"string.h"
 #include"assert.h"
-#include"stdio.h"
 
 int condense(int *e, int *c_e, int len, float thresh, int **out) {
     int cnt = len + 1, j = 0;
@@ -152,6 +151,20 @@ void vbr_csr(vbr *v, csr *c) {
             c->ptr[v->rptr[i] + r + 1] = vcnt;
         }
     }
+}
+
+void vbr_SpMV(vbr *m, vector *v, vector *r) {
+    assert(m->m == v->n);
+    assert(m->n == r->n);
+    int i,j,col,row;
+    elem_t *val = m->val;
+    for (i = 0; i< m->nr;++i)
+        for (j = m->bptr[i];j<m->bptr[i+1];++j){
+            int cc = m->bindx[j];
+            for (row = m->rptr[i]; row< m->rptr[i+1]; ++row)
+                for (col = m->cptr[cc]; col<m->cptr[cc+1];++col,++val)
+                    r->val[row]+=(*val)*v->val[col];
+        }
 }
 
 void vbr_destroy(void *v) {

@@ -28,6 +28,45 @@ void SpMV_csr_ref(void) {
     csr_SpMV(c, vec, ref);
 }
 
+void SpMV_vbr(void) {
+    vector *res;
+    res = malloc(sizeof(vector));
+    vector_init(res, c->n);
+    vbr *v = malloc(sizeof(vbr));
+
+    csr_vbr(c, v, 0.8);
+    vbr_SpMV(v, vec, res);
+
+    assert((vector_equal(ref, res)));
+
+    vector_destroy(res);
+    free(res);
+    vbr_destroy(v);
+    free(v);
+}
+
+void SpMV_ubcsr() {
+    list *l = NULL;
+    ubcsr *u;
+    csr *rem;
+    vector *res = malloc(sizeof(vector));
+    vector_init(res, c->n);
+    u = malloc(sizeof(ubcsr));
+    ubcsr_makeEmpty(u, c->n, c->m, 1, 2, NULL);
+    l = list_add(l, u);
+
+    rem = csr_ubcsr(c, l, 0.8);
+    ubcsr_SpMV(l, rem, vec, res);
+
+    assert((vector_equal(ref, res)));
+
+    list_destroy(l, ubcsr_destroy);
+    csr_destroy(rem);
+    free(rem);
+    vector_destroy(res);
+    free(res);
+}
+
 void trans_vbr(void) {
     vector *res;
     res = malloc(sizeof(vector));
@@ -75,36 +114,16 @@ void trans_ubcsr() {
     free(res);
 }
 
-void SpMV_ubcsr() {
-    list *l = NULL;
-    ubcsr *u;
-    csr *rem;
-    vector *res = malloc(sizeof(vector));
-    vector_init(res, c->n);
-    u = malloc(sizeof(ubcsr));
-    ubcsr_makeEmpty(u, c->n, c->m, 1, 2, NULL);
-    l = list_add(l, u);
-
-    rem = csr_ubcsr(c, l, 0.8);
-    ubcsr_SpMV(l, rem, vec, res);
-
-    assert((vector_equal(ref, res)));
-
-    list_destroy(l, ubcsr_destroy);
-    csr_destroy(rem);
-    free(rem);
-    vector_destroy(res);
-    free(res);
-}
-
 char *tNames[] = {
         "SpMV using CSR as ref",
+        "SpMV using VBR",
         "SpMV using UBCSR",
         "Translate to VBR",
         "Translate to UBCSR",
         NULL};
 testFunc tFuncs[] = {
         SpMV_csr_ref,
+        SpMV_vbr,
         SpMV_ubcsr,
         trans_vbr,
         trans_ubcsr,

@@ -15,7 +15,7 @@ void *list_get(list *l) {
     return l->dat;
 }
 
-void list_destroy(list *l, void (*destory)(void *d)) {
+void list_destroy(list *l, void (*destory)(void *)) {
     list *nl;
     void *dat;
     while (l != NULL) {

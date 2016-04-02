@@ -17,14 +17,12 @@ void csr_readFile(char *filename, csr *c) {
     printf("Matrix: %s", data);
     ret = fscanf(in, "%d %d %d\n", &(c->n), &(c->m), &nnz); // TODO I just ignore nnz for now
     assert(ret == 3);
-    if (DEBUG)
-        fprintf(stderr, "load_sparse_matrix:: rows = %d, cols= %d nnz = %d\n", c->n, c->m, nnz);
+    DEBUG_PRINT("load_sparse_matrix:: rows = %d, cols= %d nnz = %d\n", c->n, c->m, nnz);
 
     c->ptr = (int *) malloc(sizeof(int) * ((c->n) + 1));
     c->indx = (int *) malloc(sizeof(int) * nnz);
     c->val = malloc(sizeof(elem_t) * nnz);
-    if (DEBUG)
-        fprintf(stderr, "load_sparse_matrix::reading row index\n");
+    DEBUG_PRINT("load_sparse_matrix::reading row index\n");
 
     for (i = 0; i <= c->n; i++) {
         int temp;
@@ -36,8 +34,7 @@ void csr_readFile(char *filename, csr *c) {
         assert(temp <= nnz);
     }
 
-    if (DEBUG)
-        fprintf(stderr, "load_sparse_matrix::reading column index\n");
+    DEBUG_PRINT("load_sparse_matrix::reading column index\n");
 
     for (i = 0; i < nnz; i++) {
         int temp;
@@ -48,8 +45,7 @@ void csr_readFile(char *filename, csr *c) {
         assert(temp >= 0);
     }
 
-    if (DEBUG)
-        fprintf(stderr, "load_sparse_matrix::reading values\n");
+    DEBUG_PRINT("load_sparse_matrix::reading values\n");
 
     for (i = 0; i < nnz; i++) {
         // should I use a separate function to multiplex
@@ -61,7 +57,6 @@ void csr_readFile(char *filename, csr *c) {
         assert(ret == 1);
     }
 
-    if (DEBUG)
-        fprintf(stderr, "load_sparse_matrix::Loading sparse matrix done\n");
+    DEBUG_PRINT("load_sparse_matrix::Loading sparse matrix done\n");
 }
 

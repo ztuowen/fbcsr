@@ -1,6 +1,4 @@
 #include "vector.h"
-#include<assert.h>
-#include<string.h>
 #include<math.h>
 
 int vector_equal(vector *a, vector *b) {
