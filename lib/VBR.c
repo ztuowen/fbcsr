@@ -6,12 +6,12 @@
 int condense(int *e, int *c_e, int len, float thresh, int **out) {
     int cnt = len+1, j = 0;
     for (int i = 1; i < len; ++i)
-        if (e[i] * e[i - 1] >= thresh * c_e[i] * c_e[i - 1])
+        if (e[i] > thresh * c_e[i] * c_e[i - 1])
             --cnt;
     *out = malloc(cnt * sizeof(int));
     (*out)[0] = 0;
-    for (int i = 1; i < len; ++i)
-        if (e[i] * e[i - 1] < thresh * c_e[i] * c_e[i - 1]) {
+    for (int i = 1; i <= len; ++i)
+        if (e[i] <= thresh * c_e[i] * c_e[i - 1]) {
             (*out)[++j] = i;
         }
     (*out)[j+1] = len;
@@ -25,7 +25,7 @@ void csr_vbr(csr *c, vbr *v, float thresh) {
     v->n = c->n;
     v->m = c->m;
     k_col = malloc(v->m * sizeof(int));
-    col = malloc(v->m * sizeof(int));
+    col = malloc((v->m+1) * sizeof(int));
     k_row = malloc(v->n * sizeof(int));
     row = malloc(v->n * sizeof(int));
     memset(k_col, 0, v->m * sizeof(int));
@@ -53,7 +53,7 @@ void csr_vbr(csr *c, vbr *v, float thresh) {
     }
     // condense row
     nr = v->nr = condense(row, k_row, v->n, thresh, &(v->rptr));
-    v->bptr = malloc(nr * sizeof(int));
+    v->bptr = malloc((nr+1) * sizeof(int));
     // condense column
     nc = condense(col, k_col, v->m, thresh, &(v->cptr));
     int cnt = 0; // The total number of elements needs to be added

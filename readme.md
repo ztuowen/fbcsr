@@ -18,7 +18,6 @@ Only a whole bunch of files floating around
 
 **Needs**
 
-* Debuging & Test -- a lots of it
 * Main file
 
 # To compile

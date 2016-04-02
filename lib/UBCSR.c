@@ -1,6 +1,7 @@
 #include "UBCSR.h"
 #include "VBR.h"
 #include<assert.h>
+#include<stdio.h>
 
 csr *csr_splitOnce(csr *c, ubcsr *u, float thresh) {
     vbr *v = malloc(sizeof(vbr));
@@ -51,8 +52,8 @@ csr *csr_splitOnce(csr *c, ubcsr *u, float thresh) {
     for (i = 0; i < v->nr; ++i) {
         for (j = 0; j + u->r <= v->rptr[i + 1] - v->rptr[i]; j += u->r) //row
         {
-            u->bptr[u->nr] = bcnt;
-            u->rptr[(u->nr)++] = j + v->rptr[i];
+            u->bptr[rcnt] = bcnt;
+            u->rptr[rcnt++] = j + v->rptr[i];
             for (k = v->bptr[i]; k < v->bptr[i + 1]; ++k) {
                 int rowsize = (v->cptr[v->bindx[k] + 1] - v->cptr[v->bindx[k]]);
                 lk = 0;
@@ -68,7 +69,7 @@ csr *csr_splitOnce(csr *c, ubcsr *u, float thresh) {
                         int st = bcnt * u->c * u->r;
                         index = v->indx[k] + lk + j * rowsize;
                         u->bindx[bcnt] = v->cptr[v->bindx[k]] + lk;
-                        for (int cr = 0; cr < u->r; ++cr, index += (rowsize - u->c), ++st)
+                        for (int cr = 0; cr < u->r; ++cr, index += (rowsize - u->c))
                             for (int cc = 0; cc < u->c; ++cc, ++index, ++st) {
                                 u->val[st] = v->val[index];
                                 v->val[index] = 0;
@@ -84,6 +85,8 @@ csr *csr_splitOnce(csr *c, ubcsr *u, float thresh) {
     u->bptr[rcnt] = bcnt;
     // Get the remainder
     vbr_csr(v, rem);
+    vbr_destroy(v);
+    free(v);
     return rem;
 }
 
@@ -126,6 +129,7 @@ csr *ubcsrSingle_csr(ubcsr *u) {
     // Malloc
     c->val = malloc(vcnt * sizeof(elem_t));
     c->indx = malloc(vcnt * sizeof(int));
+    c->ptr = malloc((u->n+1) * sizeof(int));
 
     // Fill
     int row = 0;
