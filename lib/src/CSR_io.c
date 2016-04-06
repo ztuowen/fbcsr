@@ -7,10 +7,11 @@ void csr_readFile(char *filename, csr *c) {
     int ret;
     in = fopen(filename, "r");
     if (in == NULL) {
-        printf("something might be wrong with the file\n");
+        fprintf(stderr, "something might be wrong with the file\n");
+        exit(-1);
     }
     fgets(data, 1024, in);
-    printf("Matrix: %s", data);
+    DEBUG_PRINT("Matrix: %s", data);
     ret = fscanf(in, "%d %d %d\n", &(c->n), &(c->m), &(c->nnz));
     assert(ret == 3);
     DEBUG_PRINT("load_sparse_matrix:: rows = %d, cols= %d nnz = %d\n", c->n, c->m, c->nnz);

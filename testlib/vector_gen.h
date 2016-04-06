@@ -8,6 +8,13 @@
 #include"prefix.h"
 #include"vector.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 void vector_gen_random(vector *v, int n, elem_t (*random)(void));
 
+#ifdef __cplusplus
+}
+#endif
 #endif //MATRIXREP_RANDOM_GEN_H_H
