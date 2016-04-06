@@ -5,12 +5,12 @@
 #include"../vector.h"
 #include"cuHelper.h"
 
-extern "C" void vector_memCpy(vector *src,vector *dst,enum DeviceCopyDIR dir){
+extern "C" void vector_memCpy(vector *src, vector *dst, enum DeviceCopyDIR dir) {
     dst->n = src->n;
-    memCopy((void*)src->val,(void**)&(dst->val),sizeof(elem_t)*dst->n,dir);
+    memCopy((void **) &(dst->val), (void *) src->val, sizeof(elem_t) * dst->n, dir);
 }
 
-extern "C" void vector_CUDA_destroy(void *v){
+extern "C" void vector_CUDA_destroy(void *v) {
     vector *vv = (vector *) v;
     safeCudaFree(vv->val);
 }

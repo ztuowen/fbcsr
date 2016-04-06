@@ -4,6 +4,9 @@
 #include"CSR.h"
 #include"prefix.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 typedef struct vbr {
     int n, m;
     int nr;
@@ -24,4 +27,7 @@ void vbr_SpMV(vbr *m, vector *v, vector *r);
 
 void vbr_destroy(void *v);   // vbr might not be a pointer
 
+#ifdef __cplusplus
+}
+#endif
 #endif

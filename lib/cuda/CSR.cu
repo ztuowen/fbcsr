@@ -9,9 +9,10 @@
 extern "C" void csr_memCpy(csr *src, csr *dst, enum DeviceCopyDIR dir) {
     dst->m = src->m;
     dst->n = src->n;
-    memCopy((void *) src->ptr, (void **) &(dst->ptr), sizeof(int) * (dst->n + 1), dir);
-    memCopy((void *) src->indx, (void **) &(dst->indx), sizeof(int) * (src->ptr[src->n]), dir);
-    memCopy((void *) src->val, (void **) &(dst->val), sizeof(elem_t) * (src->ptr[src->n]), dir);
+    dst->nnz = src->nnz;
+    memCopy((void **) &(dst->ptr), (void *) src->ptr, sizeof(int) * (dst->n + 1), dir);
+    memCopy((void **) &(dst->indx), (void *) src->indx, sizeof(int) * (src->ptr[src->n]), dir);
+    memCopy((void **) &(dst->val), (void *) src->val, sizeof(elem_t) * (src->ptr[src->n]), dir);
 }
 
 extern "C" void csr_CUDA_SpMV(csr *m, vector *v, vector *r) {

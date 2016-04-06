@@ -3,6 +3,9 @@
 
 #include"prefix.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 typedef struct list {
     struct list *nxt;
     void *dat; // this have to be multiplexed
@@ -15,4 +18,7 @@ void *list_get(list *l);
 
 void list_destroy(list *l, void (*destroy)(void *d)); // pass null to do nothing
 
+#ifdef __cplusplus
+}
+#endif
 #endif

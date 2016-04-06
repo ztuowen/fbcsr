@@ -14,6 +14,7 @@ typedef struct ubcsr {
     int c, r;
     int nr;
     int nnz;
+    int nb;       // number of blocks
     int *rptr;      // Integer array, storing the row partitioning information
     void *optKernel; // Optimized kernel function, don't know if this is ok, but just use it for now
     // Null for default;
@@ -34,7 +35,7 @@ void ubcsr_destroy(void *u);
 
 void ubcsr_SpMV(list *l, vector *v, vector *r);
 
-void ubcsr_memCpy(list *src,list *dst,enum DeviceCopyDIR dir);
+void ubcsr_memCpy(list *src, list *dst, enum DeviceCopyDIR dir);
 
 void ubcsr_CUDA_SpMV(list *l, vector *v, vector *r);
 

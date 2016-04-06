@@ -11,6 +11,6 @@
 #define safeCudaFree(x) {if (x) cuCheck(cudaFree(x));}
 #define cuSparseCheck(x) { cusparseStatus_t e = (x); if (e!=CUSPARSE_STATUS_SUCCESS) {fprintf(stderr,"CUDA CALL FAILED");exit(-1);} }
 
-void memCopy(void *src,void **dst,int size,enum DeviceCopyDIR dir);
+void memCopy(void **dst, void *src, int size, enum DeviceCopyDIR dir);
 
 #endif //MATRIXREP_CUHELPER_H_H

@@ -29,10 +29,9 @@ set(LIB_CUDA
 set(TESTLIB_FILES testlib/src/vector_gen.c)
 
 include_directories(lib)
-cuda_add_library(CUDA_O ${LIB_CUDA})
-message(STATUS ${CUDA_O})
-cuda_add_executable(testcases testcases.c ${LIB_FILES} ${TESTLIB_FILES})
-target_link_libraries(testcases CUDA_O ${CUDA_cusparse_LIBRARY})
+cuda_add_library(cudalib ${LIB_CUDA} ${LIB_FILES})
+cuda_add_executable(testcases testcases.c ${TESTLIB_FILES} ${LIB_FILES})
+target_link_libraries(testcases cudalib ${CUDA_cusparse_LIBRARY})
 cuda_add_cublas_to_target( testcases )
 
 cuda_add_executable(cudaSample cudaSample.cu)

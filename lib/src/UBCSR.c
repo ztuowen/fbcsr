@@ -81,6 +81,7 @@ csr *csr_splitOnce(csr *c, ubcsr *u, float thresh) {
     }
     assert(u->nr == rcnt);
     u->bptr[rcnt] = bcnt;
+    u->nb = bcnt;
     // Get the remainder
     vbr_csr(v, rem);
     u->nnz = c->nnz - rem->nnz;
@@ -220,5 +221,8 @@ void ubcsr_makeEmpty(ubcsr *u, int n, int m, int c, int r, void *optKrnl) {
     u->m = m;
     u->c = c;
     u->r = r;
+    u->nr = 0;
+    u->nnz = 0;
+    u->nb = 0;
     u->optKernel = optKrnl;
 }
