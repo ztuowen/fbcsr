@@ -11,7 +11,7 @@ void csr_readFile(char *filename, csr *c) {
     }
     fgets(data, 1024, in);
     printf("Matrix: %s", data);
-    ret = fscanf(in, "%d %d %d\n", &(c->n), &(c->m), &(c->nnz)); // TODO I just ignore nnz for now
+    ret = fscanf(in, "%d %d %d\n", &(c->n), &(c->m), &(c->nnz));
     assert(ret == 3);
     DEBUG_PRINT("load_sparse_matrix:: rows = %d, cols= %d nnz = %d\n", c->n, c->m, c->nnz);
 

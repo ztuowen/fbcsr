@@ -278,7 +278,6 @@ int main(int argc, char** argv)
         return EXIT_FAILURE;
     }
 
-      // TODO: Add your own version here
     cudaEventCreate(&start_event);
     cudaEventCreate(&stop_event);
     cudaEventRecord(start_event, 0);   

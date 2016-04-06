@@ -12,7 +12,6 @@
 #include"UBCSR.h"
 #include"timing.h"
 #include<unistd.h>
-#include<stdio.h>
 #include<assert.h>
 #include<math.h>
 

@@ -5,8 +5,6 @@
 #include "../vector_gen.h"
 #include<time.h>
 
-#define DEFAULT_RNG 30
-
 elem_t default_random(void) {
     return (elem_t) rand() / RAND_MAX;
 }

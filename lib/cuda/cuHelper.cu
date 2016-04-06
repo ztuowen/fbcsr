@@ -1,6 +1,6 @@
 #include"cuHelper.h"
 
-void memCopy(void **dst, void *src, int numBytes, enum DeviceCopyDIR dir) {
+void memCopy(void **dst, void *src, size_t numBytes, enum DeviceCopyDIR dir) {
     switch (dir) {
         case cpyHostToDevice: cuCheck(cudaMalloc(dst, numBytes));
             cuCheck(cudaMemcpy(*dst, src, numBytes, cudaMemcpyHostToDevice));
