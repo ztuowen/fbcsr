@@ -52,8 +52,14 @@ void SpMV_ubcsr() {
     csr *rem;
     vector res;
     vector_init(&res, c->n);
-    u = (ubcsr*)malloc(sizeof(ubcsr));
-    ubcsr_makeEmpty(u, c->n, c->m, 1, 2, NULL);
+    u = (ubcsr *) malloc(sizeof(ubcsr));
+    ubcsr_makeEmpty(u, c->n, c->m, 1, 4, NULL);
+    l = list_add(l, u);
+    u = (ubcsr *) malloc(sizeof(ubcsr));
+    ubcsr_makeEmpty(u, c->n, c->m, 4, 1, NULL);
+    l = list_add(l, u);
+    u = (ubcsr *) malloc(sizeof(ubcsr));
+    ubcsr_makeEmpty(u, c->n, c->m, 4, 4, NULL);
     l = list_add(l, u);
 
     rem = csr_ubcsr(c, l, 0.8);
@@ -101,12 +107,25 @@ void SpMV_CUDA_ubcsr() {
     csr *rem,curem;
     vector res;
     vector_init(&res, c->n);
-    u = (ubcsr*)malloc(sizeof(ubcsr));
-    ubcsr_makeEmpty(u, c->n, c->m, 1, 2, NULL);
+
+    u = (ubcsr *) malloc(sizeof(ubcsr));
+    ubcsr_makeEmpty(u, c->n, c->m, 1, 4, NULL);
+    l = list_add(l, u);
+    u = (ubcsr *) malloc(sizeof(ubcsr));
+    ubcsr_makeEmpty(u, c->n, c->m, 4, 1, NULL);
+    l = list_add(l, u);
+    u = (ubcsr *) malloc(sizeof(ubcsr));
+    ubcsr_makeEmpty(u, c->n, c->m, 4, 4, NULL);
     l = list_add(l, u);
 
     u = (ubcsr *) malloc(sizeof(ubcsr));
-    ubcsr_makeEmpty(u, c->n, c->m, 1, 2, NULL);
+    ubcsr_makeEmpty(u, c->n, c->m, 1, 4, NULL);
+    cul = list_add(cul, u);
+    u = (ubcsr *) malloc(sizeof(ubcsr));
+    ubcsr_makeEmpty(u, c->n, c->m, 4, 1, NULL);
+    cul = list_add(cul, u);
+    u = (ubcsr *) malloc(sizeof(ubcsr));
+    ubcsr_makeEmpty(u, c->n, c->m, 4, 4, NULL);
     cul = list_add(cul, u);
 
     rem = csr_ubcsr(c, l, 0.8);
@@ -197,8 +216,8 @@ char *tNames[] = {
         "SpMV using CSR as ref",
         "SpMV using VBR",
         "SpMV using UBCSR",
-//        "SpMV using CSR+CUDA",
-//        "SpMV using UBCSR+CUDA",
+        "SpMV using CSR+CUDA",
+        "SpMV using UBCSR+CUDA",
         "Translate to VBR",
         "Translate to UBCSR",
         "Timing",
@@ -208,8 +227,8 @@ testFunc tFuncs[] = {
         SpMV_csr_ref,
         SpMV_vbr,
         SpMV_ubcsr,
-//        SpMV_CUDA_csr,
-//        SpMV_CUDA_ubcsr,
+        SpMV_CUDA_csr,
+        SpMV_CUDA_ubcsr,
         trans_vbr,
         trans_ubcsr,
         timing,

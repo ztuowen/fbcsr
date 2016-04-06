@@ -58,14 +58,26 @@ int main(int argc, char **argv) {
         cudaEventCreate(&ed);
         vector_init(&res, c.n);
         u = (ubcsr *) malloc(sizeof(ubcsr));
-        ubcsr_makeEmpty(u, c.n, c.m, 1, 2, NULL);
+        ubcsr_makeEmpty(u, c.n, c.m, 1, 4, NULL);
+        l = list_add(l, u);
+        u = (ubcsr *) malloc(sizeof(ubcsr));
+        ubcsr_makeEmpty(u, c.n, c.m, 4, 1, NULL);
+        l = list_add(l, u);
+        u = (ubcsr *) malloc(sizeof(ubcsr));
+        ubcsr_makeEmpty(u, c.n, c.m, 4, 4, NULL);
         l = list_add(l, u);
 
         u = (ubcsr *) malloc(sizeof(ubcsr));
-        ubcsr_makeEmpty(u, c.n, c.m, 1, 2, NULL);
+        ubcsr_makeEmpty(u, c.n, c.m, 1, 4, NULL);
+        cul = list_add(cul, u);
+        u = (ubcsr *) malloc(sizeof(ubcsr));
+        ubcsr_makeEmpty(u, c.n, c.m, 4, 1, NULL);
+        cul = list_add(cul, u);
+        u = (ubcsr *) malloc(sizeof(ubcsr));
+        ubcsr_makeEmpty(u, c.n, c.m, 4, 4, NULL);
         cul = list_add(cul, u);
 
-        rem = csr_ubcsr(&c, l, 0.8);
+        rem = csr_ubcsr(&c, l, 0.7);
 
         vector_memCpy(&vec, &cuv, cpyHostToDevice);
         vector_memCpy(&res, &cur, cpyHostToDevice);
