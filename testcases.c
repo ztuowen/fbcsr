@@ -10,8 +10,11 @@
 #include"CSR.h"
 #include"VBR.h"
 #include"UBCSR.h"
+#include"timing.h"
+#include<unistd.h>
 #include<stdio.h>
 #include<assert.h>
+#include<math.h>
 
 csr *c;
 vector *vec;
@@ -114,19 +117,34 @@ void trans_ubcsr() {
     free(res);
 }
 
+void timing() {
+    struct timespec b, e;
+    long sec, nsec;
+    float msec;
+    GET_TIME(b);
+    sleep(1);
+    GET_TIME(e);
+    msec = elapsed_time_msec(&b, &e, &sec, &nsec);
+    // Allow some uncertainty for sleep
+    assert(fabs(msec - 1000) < 10);
+}
+
 char *tNames[] = {
         "SpMV using CSR as ref",
         "SpMV using VBR",
         "SpMV using UBCSR",
         "Translate to VBR",
         "Translate to UBCSR",
+        "Timing",
         NULL};
+
 testFunc tFuncs[] = {
         SpMV_csr_ref,
         SpMV_vbr,
         SpMV_ubcsr,
         trans_vbr,
         trans_ubcsr,
+        timing,
         NULL};
 
 int main() {

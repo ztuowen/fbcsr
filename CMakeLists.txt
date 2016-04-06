@@ -4,7 +4,7 @@ project(matrixRep)
 find_package(CUDA)
 set(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS})
 
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -std=c99")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -std=gnu99")
 
 set(LIB_FILES
         lib/src/CSR.c
@@ -12,7 +12,8 @@ set(LIB_FILES
         lib/src/list.c
         lib/src/UBCSR.c
         lib/src/VBR.c
-        lib/src/vector.c)
+        lib/src/vector.c
+        lib/src/timing.c)
 
 set(TESTLIB_FILES testlib/src/vector_gen.c)
 
