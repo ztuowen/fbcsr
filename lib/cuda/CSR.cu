@@ -11,8 +11,8 @@ extern "C" void csr_memCpy(csr *src, csr *dst, enum DeviceCopyDIR dir) {
     dst->n = src->n;
     dst->nnz = src->nnz;
     memCopy((void **) &(dst->ptr), (void *) src->ptr, sizeof(int) * (dst->n + 1), dir);
-    memCopy((void **) &(dst->indx), (void *) src->indx, sizeof(int) * (src->ptr[src->n]), dir);
-    memCopy((void **) &(dst->val), (void *) src->val, sizeof(elem_t) * (src->ptr[src->n]), dir);
+    memCopy((void **) &(dst->indx), (void *) src->indx, sizeof(int) * (src->nnz), dir);
+    memCopy((void **) &(dst->val), (void *) src->val, sizeof(elem_t) * (src->nnz), dir);
 }
 
 extern "C" void csr_CUDA_SpMV(csr *m, vector *v, vector *r) {
@@ -23,9 +23,8 @@ extern "C" void csr_CUDA_SpMV(csr *m, vector *v, vector *r) {
     cusparseHandle_t handle;
     cuSparseCheck(cusparseCreate(&handle));
     elem_t unit = 1;
-    cuSparseCheck(
             cusparseScsrmv(handle, CUSPARSE_OPERATION_NON_TRANSPOSE, m->n, m->m, m->nnz, &unit, descr, m->val, m->ptr,
-                           m->indx, v->val, &unit, r->val));
+                           m->indx, v->val, &unit, r->val);
     cuSparseCheck(cusparseDestroy(handle));
     cuSparseCheck(cusparseDestroyMatDescr(descr));
 }

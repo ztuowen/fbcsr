@@ -23,7 +23,7 @@
 #endif
 #endif
 
-#define _FLOAT_PREC (1e-9)
+#define FLOAT_PREC (1e-2)
 typedef float elem_t;
 
 enum DeviceCopyDIR {
