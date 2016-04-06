@@ -83,6 +83,7 @@ csr *csr_splitOnce(csr *c, ubcsr *u, float thresh) {
     u->bptr[rcnt] = bcnt;
     // Get the remainder
     vbr_csr(v, rem);
+    u->nnz = c->nnz - rem->nnz;
     vbr_destroy(v);
     free(v);
     return rem;
@@ -124,6 +125,7 @@ csr *ubcsrSingle_csr(ubcsr *u) {
     for (i = 0; i < cnt; ++i)
         if (u->val[i] != 0)
             ++vcnt;
+    c->nnz = vcnt;
     // Malloc
     c->val = malloc(vcnt * sizeof(elem_t));
     c->indx = malloc(vcnt * sizeof(int));
@@ -199,9 +201,8 @@ void ubcsrSingle_SpMV(ubcsr *u, vector *v, vector *r) {
         }
 }
 
-void ubcsr_SpMV(list *l, csr *rem, vector *v, vector *r) {
+void ubcsr_SpMV(list *l, vector *v, vector *r) {
     ubcsr *u;
-    csr_SpMV(rem, v, r);
     while (l != NULL) {
         u = (ubcsr *) list_get(l);
         if (u->optKernel == NULL)
