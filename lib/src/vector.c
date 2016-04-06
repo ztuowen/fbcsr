@@ -5,13 +5,8 @@ int vector_equal(vector *a, vector *b) {
     assert(a->n == b->n);
     int i;
     for (i = 0; i < a->n; ++i)
-#ifdef USE_FLOAT
         if (fabs(a->val[i] - b->val[i])>_FLOAT_PREC)
             return 0;
-#else
-            if (a->val[i] != b->val[i])
-                return 0;
-#endif
     return 1;
 }
 

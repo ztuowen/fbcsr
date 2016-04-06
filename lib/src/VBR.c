@@ -22,6 +22,7 @@ void csr_vbr(csr *c, vbr *v, float thresh) {
     int nr, nc;
     v->n = c->n;
     v->m = c->m;
+    v->nnz = c->nnz;
     k_col = malloc(v->m * sizeof(int));
     col = malloc((v->m + 1) * sizeof(int));
     k_row = malloc(v->n * sizeof(int));
@@ -131,6 +132,7 @@ void vbr_csr(vbr *v, csr *c) {
     for (i = 0; i < cnt; ++i)
         if (v->val[i] != 0)
             ++vcnt;
+    c->nnz=vcnt;
     c->val = malloc(vcnt * sizeof(elem_t));
     c->indx = malloc(vcnt * sizeof(int));
     vcnt = 0;

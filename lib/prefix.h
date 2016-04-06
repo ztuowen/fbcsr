@@ -23,11 +23,12 @@
 #endif
 #endif
 
-#ifdef USE_FLOAT
 #define _FLOAT_PREC (1e-9)
 typedef float elem_t;
-#else
-typedef int elem_t;
-#endif
+
+enum DeviceCopyDIR {
+    cpyHostToDevice,
+    cpyDeviceToHost
+};
 
 #endif

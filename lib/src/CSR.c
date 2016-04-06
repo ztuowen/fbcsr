@@ -11,6 +11,7 @@ void csr_destroy(void *c) {
 void csr_makeEmpty(csr *c, int n, int m) {
     c->n = n;
     c->m = m;
+    c->nnz = 0;
     c->val = NULL;
     c->indx = NULL;
     c->ptr = malloc((n + 1) * sizeof(int));
@@ -20,6 +21,7 @@ void csr_makeEmpty(csr *c, int n, int m) {
 void csr_merge(csr *a, csr *b) {
     assert(a->n == b->n);
     assert(a->m == b->m);
+    a ->nnz+=b->nnz;
     int i, aj, bj;
     int cnt = a->ptr[a->n] + b->ptr[b->n];
     elem_t *val = malloc(cnt * sizeof(elem_t));

@@ -33,9 +33,9 @@ void SpMV_csr_ref(void) {
 
 void SpMV_vbr(void) {
     vector *res;
-    res = malloc(sizeof(vector));
+    res = (vector*)malloc(sizeof(vector));
     vector_init(res, c->n);
-    vbr *v = malloc(sizeof(vbr));
+    vbr *v = (vbr*)malloc(sizeof(vbr));
 
     csr_vbr(c, v, 0.8);
     vbr_SpMV(v, vec, res);
@@ -52,30 +52,92 @@ void SpMV_ubcsr() {
     list *l = NULL;
     ubcsr *u;
     csr *rem;
-    vector *res = malloc(sizeof(vector));
-    vector_init(res, c->n);
-    u = malloc(sizeof(ubcsr));
+    vector res;
+    vector_init(&res, c->n);
+    u = (ubcsr*)malloc(sizeof(ubcsr));
     ubcsr_makeEmpty(u, c->n, c->m, 1, 2, NULL);
     l = list_add(l, u);
 
     rem = csr_ubcsr(c, l, 0.8);
-    ubcsr_SpMV(l, rem, vec, res);
+    csr_SpMV(rem,vec,&res);
+    ubcsr_SpMV(l, vec, &res);
 
-    assert((vector_equal(ref, res)));
+    assert((vector_equal(ref, &res)));
 
     list_destroy(l, ubcsr_destroy);
     csr_destroy(rem);
     free(rem);
-    vector_destroy(res);
-    free(res);
+    vector_destroy(&res);
+}
+
+void SpMV_CUDA_csr() {
+    vector cuv;
+    vector cur;
+    csr cum;
+    vector res;
+    vector_init(&res, c->n);
+    csr_memCpy(c,&cum,cpyHostToDevice);
+
+    vector_memCpy(vec,&cuv,cpyHostToDevice);
+    vector_memCpy(&res,&cur,cpyHostToDevice);
+
+    csr_CUDA_SpMV(&cum,&cuv,&cur);
+
+    vector_destroy(&res);
+    vector_memCpy(&cur,&res,cpyDeviceToHost);
+
+    assert((vector_equal(ref, &res)));
+
+    vector_destroy(&res);
+    csr_CUDA_destroy(&cum);
+    vector_CUDA_destroy(&cuv);
+    vector_CUDA_destroy(&cur);
+}
+
+void SpMV_CUDA_ubcsr() {
+    list *l = NULL;
+    list *cul = NULL;
+    vector cuv;
+    vector cur;
+    ubcsr *u;
+    csr *rem,curem;
+    vector res;
+    vector_init(&res, c->n);
+    u = (ubcsr*)malloc(sizeof(ubcsr));
+    ubcsr_makeEmpty(u, c->n, c->m, 1, 2, NULL);
+    l = list_add(l, u);
+
+    rem = csr_ubcsr(c, l, 0.8);
+
+    vector_memCpy(vec,&cuv,cpyHostToDevice);
+    vector_memCpy(&res,&cur,cpyHostToDevice);
+    csr_memCpy(rem,&curem,cpyHostToDevice);
+    ubcsr_memCpy(l,cul,cpyHostToDevice);
+
+    csr_CUDA_SpMV(&curem,&cuv,&cur);
+    ubcsr_CUDA_SpMV(cul, &cuv, &cur);
+
+    vector_destroy(&res);
+    vector_memCpy(&cur,&res,cpyDeviceToHost);
+
+    assert((vector_equal(ref, &res)));
+
+    list_destroy(l, ubcsr_destroy);
+    csr_destroy(rem);
+    free(rem);
+    vector_destroy(&res);
+    csr_CUDA_destroy(&curem);
+    vector_CUDA_destroy(&cuv);
+    vector_CUDA_destroy(&cur);
+    list_destroy(cul,ubcsr_CUDA_destroy);
 }
 
 void trans_vbr(void) {
     vector *res;
-    res = malloc(sizeof(vector));
-    csr *nc = malloc(sizeof(csr));
+    res = (vector*)malloc(sizeof(vector));
+    csr *nc = (csr*)malloc(sizeof(csr));
     vector_init(res, c->n);
-    vbr *v = malloc(sizeof(vbr));
+    vbr *v = (vbr*)malloc(sizeof(vbr));
 
     csr_vbr(c, v, 0.8);
     vbr_csr(v, nc);
@@ -95,10 +157,10 @@ void trans_ubcsr() {
     list *l = NULL;
     ubcsr *u;
     csr *rem;
-    csr *nc = malloc(sizeof(csr));
-    vector *res = malloc(sizeof(vector));
+    csr *nc = (csr*)malloc(sizeof(csr));
+    vector *res = (vector*)malloc(sizeof(vector));
     vector_init(res, c->n);
-    u = malloc(sizeof(ubcsr));
+    u = (ubcsr*)malloc(sizeof(ubcsr));
     ubcsr_makeEmpty(u, c->n, c->m, 1, 2, NULL);
     l = list_add(l, u);
 
@@ -133,6 +195,8 @@ char *tNames[] = {
         "SpMV using CSR as ref",
         "SpMV using VBR",
         "SpMV using UBCSR",
+        "SpMV using CSR+CUDA",
+//        "SpMV using UBCSR+CUDA",
         "Translate to VBR",
         "Translate to UBCSR",
         "Timing",
@@ -142,15 +206,17 @@ testFunc tFuncs[] = {
         SpMV_csr_ref,
         SpMV_vbr,
         SpMV_ubcsr,
+        SpMV_CUDA_csr,
+//        SpMV_CUDA_ubcsr,
         trans_vbr,
         trans_ubcsr,
         timing,
         NULL};
 
 int main() {
-    c = malloc(sizeof(csr));
-    vec = malloc(sizeof(vector));
-    ref = malloc(sizeof(vector));
+    c = (csr*)malloc(sizeof(csr));
+    vec = (vector*)malloc(sizeof(vector));
+    ref = (vector*)malloc(sizeof(vector));
 
     readTest();
     vector_gen_random(vec, c->m, NULL);
@@ -163,7 +229,7 @@ int main() {
         printf("OK\n");
         ++i;
     }
-    printf("Hooray~!!!!! It is ready to exit, that means:\n1. We don't have any errors.\n2.The tests are not comprehensive.\n");
+    printf("Hooray~!!!!! It is ready to exit, that means:\n1. We don't have any errors.\n2. The tests are not comprehensive.\n");
     csr_destroy(c);
     free(c);
     vector_destroy(vec);
