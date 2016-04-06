@@ -22,7 +22,6 @@ vector *ref;
 typedef void (*testFunc)(void);
 
 void readTest(void) {
-    csr_readFile(TESTMATRIX, c);
 }
 
 void SpMV_csr_ref(void) {
@@ -198,8 +197,8 @@ char *tNames[] = {
         "SpMV using CSR as ref",
         "SpMV using VBR",
         "SpMV using UBCSR",
-        "SpMV using CSR+CUDA",
-        "SpMV using UBCSR+CUDA",
+//        "SpMV using CSR+CUDA",
+//        "SpMV using UBCSR+CUDA",
         "Translate to VBR",
         "Translate to UBCSR",
         "Timing",
@@ -209,19 +208,23 @@ testFunc tFuncs[] = {
         SpMV_csr_ref,
         SpMV_vbr,
         SpMV_ubcsr,
-        SpMV_CUDA_csr,
-        SpMV_CUDA_ubcsr,
+//        SpMV_CUDA_csr,
+//        SpMV_CUDA_ubcsr,
         trans_vbr,
         trans_ubcsr,
         timing,
         NULL};
 
-int main() {
+int main(int argc, char **argv) {
+    if (argc < 2) {
+        fprintf(stderr, "USAGE: %s <matrix.csr>", argv[0]);
+        return -1;
+    }
     c = (csr*)malloc(sizeof(csr));
     vec = (vector*)malloc(sizeof(vector));
     ref = (vector*)malloc(sizeof(vector));
 
-    readTest();
+    csr_readFile(argv[1], c);
     vector_gen_random(vec, c->m, NULL);
     vector_init(ref, c->n);
     int i = 0;

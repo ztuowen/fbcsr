@@ -8,7 +8,7 @@ int condense(int *e, int *c_e, int len, float thresh, int **out) {
             --cnt;
     *out = malloc(cnt * sizeof(int));
     (*out)[0] = 0;
-    for (int i = 1; i <= len; ++i)
+    for (int i = 1; i < len; ++i)
         if (e[i] <= thresh * c_e[i] * c_e[i - 1]) {
             (*out)[++j] = i;
         }
