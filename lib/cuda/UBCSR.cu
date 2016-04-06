@@ -33,8 +33,8 @@ extern "C" void ubcsr_memCpy(list *src, list *dst, enum DeviceCopyDIR dir) {
  *   int indx = 0;
  *   assert(u->m == v->n);
  *   assert(u->n == r->n);
- *   for (i = 0; i < u->nr; ++i)
- *       for (j = u->bptr[i]; j < u->bptr[i + 1]; ++j) {
+ *   for (i = 0; i < u->nr; ++i) // BLOCK
+ *       for (j = u->bptr[i]; j < u->bptr[i + 1]; ++j) { // UBCSR
  *           for (k = 0; k < u->r; ++k)
  *               for (l = 0; l < u->c; ++l, ++indx)
  *                   r->val[k + u->rptr[i]] += v->val[l + u->bindx[j]] * u->val[indx];
@@ -42,10 +42,32 @@ extern "C" void ubcsr_memCpy(list *src, list *dst, enum DeviceCopyDIR dir) {
  */
 __global__ void ubcsrSingle_CUDA_SpMV_krnl(ubcsr u, vector v, vector r) {
 
+    __shared__
+    elem_t val[32];
+    int row_offset = u.rptr[blockIdx.x];
+    int rowst = u.bptr[blockIdx.x] + threadIdx.x;
+    int rowed = u.bptr[blockIdx.x + 1];
+    int indxoffset = 0;
+    int cr = u.c * u.r;
+    for (int k = 0; k < u.r; ++k) {
+        elem_t tmp = 0;
+        for (int j = rowst; j < rowed; j += blockDim.x) {
+            int col = u.bindx[j];
+            int indx = j * cr;
+            for (int l = 0; l < u.c; ++l, ++indxoffset)
+                tmp += v.val[l + col] * u.val[indx + indxoffset];
+        }
+        val[threadIdx.x] = tmp;
+        for (int top = blockDim.x >> 1; top > 0; top >>= 1)
+            if (threadIdx.x < top)
+                val[threadIdx.x] += val[threadIdx.x + top];
+        if (threadIdx.x == 0)
+            r.val[row_offset + k] += val[0];
+    }
 }
 
 void ubcsrSingle_CUDA_SpMV(ubcsr *u, vector *v, vector *r) {
-    dim3 grid(1, 1), block(1, 1);
+    dim3 grid(u->nr), block(32);
     ubcsrSingle_CUDA_SpMV_krnl << < grid, block >> > (*u, *v, *r);
 }
 

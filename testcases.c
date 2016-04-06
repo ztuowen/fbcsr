@@ -123,7 +123,7 @@ void SpMV_CUDA_ubcsr() {
     vector_destroy(&res);
     vector_memCpy(&cur,&res,cpyDeviceToHost);
 
-    //assert((vector_equal(ref, &res)));
+    assert((vector_equal(ref, &res)));
 
     list_destroy(l, ubcsr_destroy);
     csr_destroy(rem);
