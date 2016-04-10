@@ -16,6 +16,7 @@ set(LIB_FILES
         lib/src/CSR_io.c
         lib/src/list.c
         lib/src/UBCSR.c
+        lib/src/FBCSR.c
         lib/src/VBR.c
         lib/src/vector.c
         lib/src/timing.c)
@@ -24,7 +25,8 @@ set(LIB_CUDA
         lib/cuda/UBCSR.cu
         lib/cuda/CSR.cu
         lib/cuda/vector.cu
-        lib/cuda/cuHelper.cu)
+        lib/cuda/cuHelper.cu
+        lib/cuda/FBCSR.cu)
 
 set(TESTLIB_FILES testlib/src/vector_gen.c)
 

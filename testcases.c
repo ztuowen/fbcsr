@@ -10,6 +10,7 @@
 #include"CSR.h"
 #include"VBR.h"
 #include"UBCSR.h"
+#include"FBCSR.h"
 #include"timing.h"
 #include<unistd.h>
 #include<assert.h>
@@ -21,9 +22,6 @@ vector *ref;
 
 typedef void (*testFunc)(void);
 
-void readTest(void) {
-}
-
 void SpMV_csr_ref(void) {
     // Always assumes that CSR is correct
     csr_SpMV(c, vec, ref);
@@ -31,9 +29,9 @@ void SpMV_csr_ref(void) {
 
 void SpMV_vbr(void) {
     vector *res;
-    res = (vector*)malloc(sizeof(vector));
+    res = (vector *) malloc(sizeof(vector));
     vector_init(res, c->n);
-    vbr *v = (vbr*)malloc(sizeof(vbr));
+    vbr *v = (vbr *) malloc(sizeof(vbr));
 
     csr_vbr(c, v, 0.8);
     vbr_SpMV(v, vec, res);
@@ -63,7 +61,7 @@ void SpMV_ubcsr() {
     l = list_add(l, u);
 
     rem = csr_ubcsr(c, l, 0.8);
-    csr_SpMV(rem,vec,&res);
+    csr_SpMV(rem, vec, &res);
     ubcsr_SpMV(l, vec, &res);
 
     assert((vector_equal(ref, &res)));
@@ -80,15 +78,15 @@ void SpMV_CUDA_csr() {
     csr cum;
     vector res;
     vector_init(&res, c->n);
-    csr_memCpy(c,&cum,cpyHostToDevice);
+    csr_memCpy(c, &cum, cpyHostToDevice);
 
-    vector_memCpy(vec,&cuv,cpyHostToDevice);
-    vector_memCpy(&res,&cur,cpyHostToDevice);
+    vector_memCpy(vec, &cuv, cpyHostToDevice);
+    vector_memCpy(&res, &cur, cpyHostToDevice);
 
-    csr_CUDA_SpMV(&cum,&cuv,&cur);
+    csr_CUDA_SpMV(&cum, &cuv, &cur);
 
     vector_destroy(&res);
-    vector_memCpy(&cur,&res,cpyDeviceToHost);
+    vector_memCpy(&cur, &res, cpyDeviceToHost);
 
     assert((vector_equal(ref, &res)));
 
@@ -104,7 +102,7 @@ void SpMV_CUDA_ubcsr() {
     vector cuv;
     vector cur;
     ubcsr *u;
-    csr *rem,curem;
+    csr *rem, curem;
     vector res;
     vector_init(&res, c->n);
 
@@ -130,16 +128,16 @@ void SpMV_CUDA_ubcsr() {
 
     rem = csr_ubcsr(c, l, 0.8);
 
-    vector_memCpy(vec,&cuv,cpyHostToDevice);
-    vector_memCpy(&res,&cur,cpyHostToDevice);
-    csr_memCpy(rem,&curem,cpyHostToDevice);
-    ubcsr_memCpy(l,cul,cpyHostToDevice);
+    vector_memCpy(vec, &cuv, cpyHostToDevice);
+    vector_memCpy(&res, &cur, cpyHostToDevice);
+    csr_memCpy(rem, &curem, cpyHostToDevice);
+    ubcsr_memCpy(l, cul, cpyHostToDevice);
 
-    csr_CUDA_SpMV(&curem,&cuv,&cur);
+    csr_CUDA_SpMV(&curem, &cuv, &cur);
     ubcsr_CUDA_SpMV(cul, &cuv, &cur);
 
     vector_destroy(&res);
-    vector_memCpy(&cur,&res,cpyDeviceToHost);
+    vector_memCpy(&cur, &res, cpyDeviceToHost);
 
     assert((vector_equal(ref, &res)));
 
@@ -150,15 +148,15 @@ void SpMV_CUDA_ubcsr() {
     csr_CUDA_destroy(&curem);
     vector_CUDA_destroy(&cuv);
     vector_CUDA_destroy(&cur);
-    list_destroy(cul,ubcsr_CUDA_destroy);
+    list_destroy(cul, ubcsr_CUDA_destroy);
 }
 
 void trans_vbr(void) {
     vector *res;
-    res = (vector*)malloc(sizeof(vector));
-    csr *nc = (csr*)malloc(sizeof(csr));
+    res = (vector *) malloc(sizeof(vector));
+    csr *nc = (csr *) malloc(sizeof(csr));
     vector_init(res, c->n);
-    vbr *v = (vbr*)malloc(sizeof(vbr));
+    vbr *v = (vbr *) malloc(sizeof(vbr));
 
     csr_vbr(c, v, 0.8);
     vbr_csr(v, nc);
@@ -178,10 +176,10 @@ void trans_ubcsr() {
     list *l = NULL;
     ubcsr *u;
     csr *rem;
-    csr *nc = (csr*)malloc(sizeof(csr));
-    vector *res = (vector*)malloc(sizeof(vector));
+    csr *nc = (csr *) malloc(sizeof(csr));
+    vector *res = (vector *) malloc(sizeof(vector));
     vector_init(res, c->n);
-    u = (ubcsr*)malloc(sizeof(ubcsr));
+    u = (ubcsr *) malloc(sizeof(ubcsr));
     ubcsr_makeEmpty(u, c->n, c->m, 1, 2, NULL);
     l = list_add(l, u);
 
@@ -190,6 +188,38 @@ void trans_ubcsr() {
     csr_SpMV(nc, vec, res);
 
     assert((vector_equal(ref, res)));
+
+    list_destroy(l, ubcsr_destroy);
+    csr_destroy(nc);
+    free(nc);
+    csr_destroy(rem);
+    free(rem);
+    vector_destroy(res);
+    free(res);
+}
+
+void trans_fbcsr() {
+    list *l = NULL;
+    fbcsr *f;
+    csr *rem;
+    csr *nc = (csr *) malloc(sizeof(csr));
+    vector *res = (vector *) malloc(sizeof(vector));
+    vector_init(res, c->n);
+    f = (fbcsr *) malloc(sizeof(fbcsr));
+    fbcsr_makeEmpty(f, c->n, c->m, 1, 4, 4, NULL, fbcsr_column);
+    l = list_add(l, f);
+
+    rem = csr_ubcsr(c, l, 0.7);
+    csr_SpMV(rem, vec, res);
+    fbcsr_SpMV(l, vec, res);
+    assert((vector_equal(ref, res)));
+
+    vector_destroy(res);
+    vector_init(res, c->n);
+    ubcsr_csr(l, rem, nc);
+    csr_SpMV(nc, vec, res);
+    assert((vector_equal(ref, res)));
+
 
     list_destroy(l, ubcsr_destroy);
     csr_destroy(nc);
@@ -216,22 +246,24 @@ char *tNames[] = {
         "SpMV using CSR as ref",
         "SpMV using VBR",
         "SpMV using UBCSR",
-        "SpMV using CSR+CUDA",
-        "SpMV using UBCSR+CUDA",
+        "Translate & SpMV using FBCSR",
         "Translate to VBR",
         "Translate to UBCSR",
         "Timing",
+        "SpMV using CSR+CUDA",
+        "SpMV using UBCSR+CUDA",
         NULL};
 
 testFunc tFuncs[] = {
         SpMV_csr_ref,
         SpMV_vbr,
         SpMV_ubcsr,
-        SpMV_CUDA_csr,
-        SpMV_CUDA_ubcsr,
+        trans_fbcsr,
         trans_vbr,
         trans_ubcsr,
         timing,
+        SpMV_CUDA_csr,
+        SpMV_CUDA_ubcsr,
         NULL};
 
 int main(int argc, char **argv) {
@@ -239,9 +271,9 @@ int main(int argc, char **argv) {
         fprintf(stderr, "USAGE: %s <matrix.csr>", argv[0]);
         return -1;
     }
-    c = (csr*)malloc(sizeof(csr));
-    vec = (vector*)malloc(sizeof(vector));
-    ref = (vector*)malloc(sizeof(vector));
+    c = (csr *) malloc(sizeof(csr));
+    vec = (vector *) malloc(sizeof(vector));
+    ref = (vector *) malloc(sizeof(vector));
 
     csr_readFile(argv[1], c);
     vector_gen_random(vec, c->m, NULL);

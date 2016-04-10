@@ -1,7 +1,7 @@
 #include "../UBCSR.h"
 #include "../VBR.h"
 
-csr *csr_splitOnce(csr *c, ubcsr *u, float thresh) {
+csr *ubcsr_csr_splitOnce(csr *c, ubcsr *u, float thresh) {
     vbr *v = malloc(sizeof(vbr));
     csr *rem = malloc(sizeof(csr));
     int i, j, k, lk;
@@ -97,12 +97,12 @@ csr *csr_ubcsr(csr *c, list *l, float thresh) {
 
     if (l != NULL) {
         u = (ubcsr *) list_get(l);
-        last = csr_splitOnce(c, u, thresh);
+        last = ubcsr_csr_splitOnce(c, u, thresh);
         l = list_next(l);
         while (l != NULL) {
             u = (ubcsr *) list_get(l);
 
-            r = csr_splitOnce(last, u, thresh);
+            r = ubcsr_csr_splitOnce(last, u, thresh);
 
             // setup for next iter
             l = list_next(l);
