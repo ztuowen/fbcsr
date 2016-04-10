@@ -10,7 +10,9 @@ int floatEqual(elem_t a, elem_t b) {
         return 1;
     } else if ((a == 0 || b == 0) && diff < FLOAT_PREC)
         return 1;
-    return diff / (absA + absB) < FLOAT_PREC;
+    else if (diff / (absA + absB) < FLOAT_PREC)
+        return 1;
+    return 0;
 }
 
 int vector_equal(vector *a, vector *b) {

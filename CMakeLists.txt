@@ -26,7 +26,8 @@ set(LIB_CUDA
         lib/cuda/CSR.cu
         lib/cuda/vector.cu
         lib/cuda/cuHelper.cu
-        lib/cuda/FBCSR.cu)
+        lib/cuda/FBCSR.cu
+        lib/cuda/FBCSR_krnl.cu)
 
 set(TESTLIB_FILES testlib/src/vector_gen.c)
 

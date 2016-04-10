@@ -198,6 +198,28 @@ void trans_ubcsr() {
     free(res);
 }
 
+void SpMV_fbcsr() {
+    list *l = NULL;
+    fbcsr *f;
+    csr *rem;
+    vector *res = (vector *) malloc(sizeof(vector));
+    vector_init(res, c->n);
+    f = (fbcsr *) malloc(sizeof(fbcsr));
+    fbcsr_makeEmpty(f, c->n, c->m, 1, 4, 4, NULL, fbcsr_column);
+    l = list_add(l, f);
+
+    rem = csr_fbcsr(c, l, 0.7);
+    csr_SpMV(rem, vec, res);
+    fbcsr_SpMV(l, vec, res);
+    assert((vector_equal(ref, res)));
+
+    list_destroy(l, fbcsr_destroy);
+    csr_destroy(rem);
+    free(rem);
+    vector_destroy(res);
+    free(res);
+}
+
 void trans_fbcsr() {
     list *l = NULL;
     fbcsr *f;
@@ -209,19 +231,12 @@ void trans_fbcsr() {
     fbcsr_makeEmpty(f, c->n, c->m, 1, 4, 4, NULL, fbcsr_column);
     l = list_add(l, f);
 
-    rem = csr_ubcsr(c, l, 0.7);
-    csr_SpMV(rem, vec, res);
-    fbcsr_SpMV(l, vec, res);
-    assert((vector_equal(ref, res)));
-
-    vector_destroy(res);
-    vector_init(res, c->n);
-    ubcsr_csr(l, rem, nc);
+    rem = csr_fbcsr(c, l, 0.7);
+    fbcsr_csr(l, rem, nc);
     csr_SpMV(nc, vec, res);
     assert((vector_equal(ref, res)));
 
-
-    list_destroy(l, ubcsr_destroy);
+    list_destroy(l, fbcsr_destroy);
     csr_destroy(nc);
     free(nc);
     csr_destroy(rem);
@@ -246,7 +261,8 @@ char *tNames[] = {
         "SpMV using CSR as ref",
         "SpMV using VBR",
         "SpMV using UBCSR",
-        "Translate & SpMV using FBCSR",
+        "SpMV using FBCSR",
+        "Translate using FBCSR",
         "Translate to VBR",
         "Translate to UBCSR",
         "Timing",
@@ -258,6 +274,7 @@ testFunc tFuncs[] = {
         SpMV_csr_ref,
         SpMV_vbr,
         SpMV_ubcsr,
+        SpMV_fbcsr,
         trans_fbcsr,
         trans_vbr,
         trans_ubcsr,

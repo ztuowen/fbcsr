@@ -32,8 +32,8 @@ coo fbcsr_column(int elemIndx, int elemCnt) {
 
 coo fbcsr_forwardSlash(int elemIndx, int elemCnt) {
     coo c;
-    c.c = elemCnt - elemIndx - 1;
-    c.r = elemIndx;
+    c.c = elemIndx;
+    c.r = elemCnt - elemIndx - 1;
     return c;
 }
 
@@ -159,7 +159,7 @@ int csr_lookFor(csr *c, coo pos, int *last) {
     int rst = c->ptr[pos.r], red = c->ptr[pos.r + 1];
     while (*last > rst && c->indx[*last] > pos.c)
         --(*last);
-    while (*last < red && c->indx[*last] > pos.c)
+    while (*last < red && c->indx[*last] < pos.c)
         ++(*last);
     if (*last >= rst && *last < red && c->indx[*last] == pos.c)
         return 1;
@@ -190,7 +190,7 @@ csr *fbcsr_csr_splitOnce(csr *c, fbcsr *f, float thresh) {
                 coo pos = getCoo(idx, f->nelem);
                 pos.r += row;
                 pos.c += col;
-                if (csr_lookFor(c, pos, &findidx[pos.c]))
+                if (csr_lookFor(c, pos, &findidx[pos.c - col]))
                     ++cnt;
             }
             if (cnt >= thresh * f->nelem)
@@ -217,7 +217,7 @@ csr *fbcsr_csr_splitOnce(csr *c, fbcsr *f, float thresh) {
                 coo pos = getCoo(idx, f->nelem);
                 pos.r += row;
                 pos.c += col;
-                if (csr_lookFor(c, pos, &findidx[pos.c]))
+                if (csr_lookFor(c, pos, &findidx[pos.c - col]))
                     ++cnt;
             }
             if (cnt >= thresh * f->nelem) {
@@ -227,7 +227,7 @@ csr *fbcsr_csr_splitOnce(csr *c, fbcsr *f, float thresh) {
                     coo pos = getCoo(idx, f->nelem);
                     pos.r += row;
                     pos.c += col;
-                    if (csr_lookFor(c, pos, &findidx[pos.c])) {
+                    if (csr_lookFor(c, pos, &findidx[pos.c - col])) {
                         last->val[findidx[pos.c]] = 0;
                         f->val[cnt + idx] = c->val[findidx[pos.c]];
                     } else
@@ -236,17 +236,19 @@ csr *fbcsr_csr_splitOnce(csr *c, fbcsr *f, float thresh) {
                 ++vcnt;
             }
         }
-        f->rptr[r + 1] = vcnt;
+        f->bptr[r + 1] = vcnt;
     }
     vcnt = 0;
     for (row = 0; row < last->n; ++row) {
-        for (col = last->ptr[row]; col < last->ptr[row + 1]; ++col)
+        col = last->ptr[row];
+        last->ptr[row] = vcnt;
+        for (; col < last->ptr[row + 1]; ++col)
             if (last->val[col] != 0) {
                 last->val[vcnt] = last->val[col];
                 last->indx[vcnt++] = last->indx[col];
             }
-        last->ptr[row + 1] = vcnt;
     }
+    last->ptr[last->n] = vcnt;
     last->nnz = vcnt;
     f->nnz = c->nnz - last->nnz;
     return last;
