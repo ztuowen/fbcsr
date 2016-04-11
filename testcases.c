@@ -330,30 +330,30 @@ void timing() {
 
 char *tNames[] = {
         "SpMV using CSR as ref",
-        "SpMV using VBR",
-        "SpMV using UBCSR",
+//        "SpMV using VBR",
+//        "SpMV using UBCSR",
         "SpMV using FBCSR",
+//        "Translate to VBR",
+//        "Translate to UBCSR",
         "Translate using FBCSR",
-        "Translate to VBR",
-        "Translate to UBCSR",
-        "Timing",
-        "SpMV using CSR+CUDA",
-        "SpMV using UBCSR+CUDA",
+//        "SpMV using CSR+CUDA",
+//        "SpMV using UBCSR+CUDA",
         "SpMV using FBCSR+CUDA",
+//        "Timing",
         NULL};
 
 testFunc tFuncs[] = {
         SpMV_csr_ref,
-        SpMV_vbr,
-        SpMV_ubcsr,
+//        SpMV_vbr,
+//        SpMV_ubcsr,
         SpMV_fbcsr,
+//        trans_vbr,
+//        trans_ubcsr,
         trans_fbcsr,
-        trans_vbr,
-        trans_ubcsr,
-        timing,
-        SpMV_CUDA_csr,
-        SpMV_CUDA_ubcsr,
+//        SpMV_CUDA_csr,
+//        SpMV_CUDA_ubcsr,
         SpMV_CUDA_fbcsr,
+//        timing,
         NULL};
 
 int main(int argc, char **argv) {

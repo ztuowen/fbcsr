@@ -70,7 +70,7 @@ csr *fbcsrSingle_csr(fbcsr *f) {
     for (i = 0; i < f->nr; ++i) {
         int offset = 0;
         int offsetend = 0;
-        for (j = 0; j < f->r; ++j) // row
+        for (j = 0; j < f->r && f->rptr[i] + j < f->n; ++j) // row
         {
             offset = offsetend = 0;
             while (offset < f->nelem && getCoo(offset, f->nelem).r != j)
@@ -161,9 +161,13 @@ void fbcsr_SpMV(list *l, vector *v, vector *r) {
 }
 
 int csr_lookFor(csr *c, coo pos, int *last, int *mincol, int colcor) {
+    if (pos.r >= c->n)
+        return 0;
     int rst = c->ptr[pos.r], red = c->ptr[pos.r + 1];
     if ((*last) < rst)
         *last = rst;
+    if ((*last) >= red)
+        *last = red - 1;
     while (*last > rst && c->indx[*last] > pos.c)
         --(*last);
     while (*last < red && c->indx[*last] < pos.c)

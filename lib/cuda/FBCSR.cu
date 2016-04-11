@@ -39,6 +39,7 @@ extern "C" void fbcsr_CUDA_SpMV(list *l, vector *v, vector *r) {
         } else {
             fbcsrSingle_SpMVKernel krnl = (fbcsrSingle_SpMVKernel) f->optKernel;
             krnl(f, v, r);
+            cuCheck(cudaGetLastError());
         }
         l = list_next(l);
     }
