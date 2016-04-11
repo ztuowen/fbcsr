@@ -68,7 +68,8 @@ __global__ void ubcsrSingle_CUDA_SpMV_krnl(ubcsr u, vector v, vector r) {
 
 void ubcsrSingle_CUDA_SpMV(ubcsr *u, vector *v, vector *r) {
     dim3 grid(u->nr), block(32);
-    ubcsrSingle_CUDA_SpMV_krnl << < grid, block >> > (*u, *v, *r);
+    if (u->nr > 0)
+        ubcsrSingle_CUDA_SpMV_krnl << < grid, block >> > (*u, *v, *r);
 }
 
 extern "C" void ubcsr_CUDA_SpMV(list *l, vector *v, vector *r) {
@@ -80,6 +81,7 @@ extern "C" void ubcsr_CUDA_SpMV(list *l, vector *v, vector *r) {
         else {
             ubcsrSingle_SpMVKernel krnl = (ubcsrSingle_SpMVKernel) u->optKernel;
             krnl(u, v, r);
+            cuCheck(cudaGetLastError());
         }
         l = list_next(l);
     }

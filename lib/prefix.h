@@ -22,6 +22,14 @@
 #define DEBUG_PRINT(...) do {}while(0)
 #endif
 #endif
+#define max(a, b) \
+   ({ __typeof__ (a) _a = (a); \
+       __typeof__ (b) _b = (b); \
+     _a > _b ? _a : _b; })
+#define min(a, b) \
+   ({ __typeof__ (a) _a = (a); \
+       __typeof__ (b) _b = (b); \
+     _a < _b ? _a : _b; })
 
 #define FLOAT_PREC (1e-2)
 typedef float elem_t;

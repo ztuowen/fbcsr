@@ -16,6 +16,7 @@ set(LIB_FILES
         lib/src/CSR_io.c
         lib/src/list.c
         lib/src/UBCSR.c
+        lib/src/FBCSR.c
         lib/src/VBR.c
         lib/src/vector.c
         lib/src/timing.c)
@@ -24,7 +25,9 @@ set(LIB_CUDA
         lib/cuda/UBCSR.cu
         lib/cuda/CSR.cu
         lib/cuda/vector.cu
-        lib/cuda/cuHelper.cu)
+        lib/cuda/cuHelper.cu
+        lib/cuda/FBCSR.cu
+        lib/cuda/FBCSR_krnl.cu)
 
 set(TESTLIB_FILES testlib/src/vector_gen.c)
 
@@ -33,8 +36,12 @@ cuda_add_library(cudalib ${LIB_CUDA} ${LIB_FILES})
 
 cuda_add_executable(testcases testcases.c ${TESTLIB_FILES} ${LIB_FILES})
 target_link_libraries(testcases cudalib ${CUDA_cusparse_LIBRARY})
+
 cuda_add_executable(ubcsrCUDA ubcsrCUDA.cu ${TESTLIB_FILES} ${LIB_FILES})
 target_link_libraries(ubcsrCUDA cudalib ${CUDA_cusparse_LIBRARY})
+
+cuda_add_executable(fbcsrCUDA fbcsrCUDA.cu ${TESTLIB_FILES} ${LIB_FILES})
+target_link_libraries(fbcsrCUDA cudalib ${CUDA_cusparse_LIBRARY})
 
 cuda_add_executable(cudaSample cudaSample.cu)
 cuda_add_cublas_to_target( cudaSample )
