@@ -19,3 +19,24 @@ float elapsed_time_msec(struct timespec *begin, struct timespec *end, long *sec,
 	}
 	return (float)(*sec)*1000 + ((float)(*nsec))/1000000;
 }
+
+
+/*
+Timing code example
+-------------------------------------------------------
+#include <stdio.h>
+#include <>
+struct timespec s,e;
+long sec, nsec;
+float time;
+
+GET_TIME(s);
+// do your work
+GET_TIME(e);
+
+time = elapsed_time_msec(&s,&e,&sec, &nsec);
+-------------------------------------------------------
+Compiling
+-------------------------------------------------------
+gcc src/timing.c <other_source_files> <options>
+*/

@@ -333,13 +333,13 @@ char *tNames[] = {
         "SpMV using VBR",
         "SpMV using UBCSR",
         "SpMV using FBCSR",
-        "Translate using FBCSR",
         "Translate to VBR",
         "Translate to UBCSR",
-        "Timing",
+        "Translate using FBCSR",
         "SpMV using CSR+CUDA",
         "SpMV using UBCSR+CUDA",
         "SpMV using FBCSR+CUDA",
+        "Timing",
         NULL};
 
 testFunc tFuncs[] = {
@@ -347,13 +347,13 @@ testFunc tFuncs[] = {
         SpMV_vbr,
         SpMV_ubcsr,
         SpMV_fbcsr,
-        trans_fbcsr,
         trans_vbr,
         trans_ubcsr,
-        timing,
+        trans_fbcsr,
         SpMV_CUDA_csr,
         SpMV_CUDA_ubcsr,
         SpMV_CUDA_fbcsr,
+        timing,
         NULL};
 
 int main(int argc, char **argv) {
