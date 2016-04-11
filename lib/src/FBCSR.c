@@ -46,6 +46,36 @@ coo fbcsr_backwardSlash(int elemIndx, int elemCnt) {
     return c;
 }
 
+int *bestseq(int *score,int n, int con, int *tot){
+    int i;
+    int *sel;
+    sel = malloc((n+1)*sizeof(int));
+    memset(sel,0,(n+1)*sizeof(int));
+    for (i=0;i<n;++i) {
+        if (i + con <= n)
+            sel[i+con] = max(sel[i+con],sel[i]+score[i]);
+        sel[i+1] = max(sel[i+1],sel[i]);
+    }
+    i = n;
+    int sc = sel[n];
+    int li = n;
+    *tot=0;
+    while (i>0){
+        if (i-con >=0 && sel[i-con] + score[i] == sc){
+            i = i-con;
+            while (li>i)
+                sel[--li]=0;
+            sel[i] = 1;
+            ++(*tot);
+        }else {
+            --i;
+        }
+    }
+    while (li>0)
+        sel[--li]=0;
+    return sel;
+}
+
 csr *fbcsrSingle_csr(fbcsr *f) {
     csr *c = malloc(sizeof(csr));
     c->n = f->n;
@@ -182,6 +212,10 @@ csr *fbcsr_csr_splitOnce(csr *c, fbcsr *f, float thresh) {
     int row, col, idx, vcnt, cnt;
     int *findidx;
     int *minidx;
+    int *sel;
+    int tot;
+    int *rowsc = malloc(f->m*sizeof(int));
+    int *colsc = malloc(f->n*sizeof(int));
     csr *last = malloc(sizeof(csr));
     csr_makeEmpty(last, c->n, c->m);
     csr_merge(last, c);
@@ -200,9 +234,11 @@ csr *fbcsr_csr_splitOnce(csr *c, fbcsr *f, float thresh) {
     // First we will inspect and get the total number of element registered
     vcnt = 0;
     int mincol;
-    for (row = 0; row < c->n; row += f->r) {
+    memset(rowsc,0,f->m*sizeof(int));
+    for (row = 0; row < c->n; row ++) {
         // Here we use the simpler form that put the original kernel into the part
         // and assume that there is no contention in cols(we simply don't use row)
+        memset(colsc,0,f->n*sizeof(int));
         memset(findidx, 0, f->r * sizeof(int));
         for (col = 0; col < c->m;) {
             cnt = 0;
@@ -215,16 +251,22 @@ csr *fbcsr_csr_splitOnce(csr *c, fbcsr *f, float thresh) {
                     ++cnt;
             }
             if (cnt >= thresh * f->nelem) {
-                ++vcnt;
-                col += f->c;
-            } else
-                col = mincol;
+                colsc[col]=1;
+            }
+            col = mincol;
         }
+        sel = bestseq(colsc,c->m,f->c,&tot);
+        free(sel);
+        rowsc[row] = tot;
     }
+
+    // Get the best row decomposition
+    sel = bestseq(rowsc,c->n,f->r,&tot);
+
     // Now we have how many columns and how many rows that it has.
     f->val = malloc(f->nelem * vcnt * sizeof(elem_t));
     f->bindx = malloc(vcnt * sizeof(int));
-    f->nr = (f->n + f->r - 1) / f->r;
+    f->nr = tot;
     f->bptr = malloc((f->nr + 1) * sizeof(int));
     f->rptr = malloc((f->nr) * sizeof(int));
     f->nb = vcnt;
@@ -279,6 +321,7 @@ csr *fbcsr_csr_splitOnce(csr *c, fbcsr *f, float thresh) {
     last->ptr[last->n] = vcnt;
     last->nnz = vcnt;
     f->nnz = c->nnz - last->nnz;
+    free(score);
     return last;
 }
 
