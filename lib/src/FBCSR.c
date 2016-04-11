@@ -5,6 +5,8 @@
 #include"../FBCSR.h"
 #include<string.h>
 
+#define MAXCOL 1048576
+
 void fbcsr_makeEmpty(fbcsr *f, int n, int m, int c, int r, int nelem, void *optKrnl, void *getCoo) {
     f->n = n;
     f->m = m;
@@ -70,8 +72,11 @@ csr *fbcsrSingle_csr(fbcsr *f) {
         int offsetend = 0;
         for (j = 0; j < f->r; ++j) // row
         {
-            offset = offsetend;
-            while (offsetend < f->nelem && getCoo(offsetend, f->nelem).c == j)
+            offset = offsetend = 0;
+            while (offset < f->nelem && getCoo(offset, f->nelem).r != j)
+                ++offset;
+            offsetend = offset;
+            while (offsetend < f->nelem && getCoo(offsetend, f->nelem).r == j)
                 ++offsetend;
             int col;
             // write to ptr
@@ -155,14 +160,20 @@ void fbcsr_SpMV(list *l, vector *v, vector *r) {
     }
 }
 
-int csr_lookFor(csr *c, coo pos, int *last) {
+int csr_lookFor(csr *c, coo pos, int *last, int *mincol, int colcor) {
     int rst = c->ptr[pos.r], red = c->ptr[pos.r + 1];
+    if ((*last) < rst)
+        *last = rst;
     while (*last > rst && c->indx[*last] > pos.c)
         --(*last);
     while (*last < red && c->indx[*last] < pos.c)
-        ++(*last);
-    if (*last >= rst && *last < red && c->indx[*last] == pos.c)
-        return 1;
+        ++(*last); // last >= pos.c
+    if (*last >= rst && *last < red) {
+        if (c->indx[*last] == pos.c)
+            return 1;
+        if (mincol != NULL)
+            *mincol = min(*mincol, c->indx[*last] - colcor);
+    }
     return 0;
 }
 
@@ -170,31 +181,44 @@ csr *fbcsr_csr_splitOnce(csr *c, fbcsr *f, float thresh) {
     fbcsr_getCoo getCoo = (fbcsr_getCoo) f->getCoo;
     int row, col, idx, vcnt, cnt;
     int *findidx;
+    int *minidx;
     csr *last = malloc(sizeof(csr));
     csr_makeEmpty(last, c->n, c->m);
     csr_merge(last, c);
     f->n = c->n;
     f->m = c->m;
 
-    findidx = malloc(f->c * sizeof(int));
+    findidx = malloc(f->r * sizeof(int));
+    minidx = malloc(f->r * sizeof(int));
+    for (idx = 0; idx < f->r; ++idx)
+        minidx[idx] = MAXCOL;
+    for (idx = 0; idx < f->nelem; ++idx) {
+        coo pos = getCoo(idx, f->nelem);
+        minidx[pos.r] = min(minidx[pos.r], pos.c);
+    }
 
     // First we will inspect and get the total number of element registered
     vcnt = 0;
+    int mincol;
     for (row = 0; row < c->n; row += f->r) {
         // Here we use the simpler form that put the original kernel into the part
         // and assume that there is no contention in cols(we simply don't use row)
-        memset(findidx, 0, f->c * sizeof(int));
-        for (col = 0; col < c->m; col += f->c) {
+        memset(findidx, 0, f->r * sizeof(int));
+        for (col = 0; col < c->m;) {
             cnt = 0;
+            mincol = MAXCOL;
             for (idx = 0; idx < f->nelem; ++idx) {
                 coo pos = getCoo(idx, f->nelem);
                 pos.r += row;
                 pos.c += col;
-                if (csr_lookFor(c, pos, &findidx[pos.c - col]))
+                if (csr_lookFor(c, pos, &findidx[pos.r - row], &mincol, minidx[pos.r - row]))
                     ++cnt;
             }
-            if (cnt >= thresh * f->nelem)
+            if (cnt >= thresh * f->nelem) {
                 ++vcnt;
+                col += f->c;
+            } else
+                col = mincol;
         }
     }
     // Now we have how many columns and how many rows that it has.
@@ -210,14 +234,15 @@ csr *fbcsr_csr_splitOnce(csr *c, fbcsr *f, float thresh) {
     for (r = 0; r < f->nr; ++r) {
         row = f->r * r;
         f->rptr[r] = row;
-        memset(findidx, 0, f->c * sizeof(int));
-        for (col = 0; col < c->m; col += f->c) {
+        memset(findidx, 0, f->r * sizeof(int));
+        for (col = 0; col < c->m;) {
+            mincol = MAXCOL;
             cnt = 0;
             for (idx = 0; idx < f->nelem; ++idx) {
                 coo pos = getCoo(idx, f->nelem);
                 pos.r += row;
                 pos.c += col;
-                if (csr_lookFor(c, pos, &findidx[pos.c - col]))
+                if (csr_lookFor(c, pos, &findidx[pos.r - row], &mincol, minidx[pos.r - row]))
                     ++cnt;
             }
             if (cnt >= thresh * f->nelem) {
@@ -227,17 +252,20 @@ csr *fbcsr_csr_splitOnce(csr *c, fbcsr *f, float thresh) {
                     coo pos = getCoo(idx, f->nelem);
                     pos.r += row;
                     pos.c += col;
-                    if (csr_lookFor(c, pos, &findidx[pos.c - col])) {
-                        last->val[findidx[pos.c]] = 0;
-                        f->val[cnt + idx] = c->val[findidx[pos.c]];
+                    if (csr_lookFor(c, pos, &findidx[pos.r - row], NULL, 0)) {
+                        last->val[findidx[pos.r - row]] = 0;
+                        f->val[cnt + idx] = c->val[findidx[pos.r - row]];
                     } else
                         f->val[cnt + idx] = 0;
                 }
                 ++vcnt;
-            }
+                col += f->c;
+            } else
+                col = mincol;
         }
         f->bptr[r + 1] = vcnt;
     }
+    DEBUG_PRINT("Convert FBCSR: %d\n", vcnt * f->nelem);
     vcnt = 0;
     for (row = 0; row < last->n; ++row) {
         col = last->ptr[row];

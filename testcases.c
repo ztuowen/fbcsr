@@ -11,6 +11,7 @@
 #include"VBR.h"
 #include"UBCSR.h"
 #include"FBCSR.h"
+#include"FBCSR_krnl.h"
 #include"timing.h"
 #include<unistd.h>
 #include<assert.h>
@@ -70,6 +71,43 @@ void SpMV_ubcsr() {
     csr_destroy(rem);
     free(rem);
     vector_destroy(&res);
+}
+
+void SpMV_fbcsr() {
+    list *l = NULL;
+    fbcsr *f;
+    csr *rem;
+    vector *res = (vector *) malloc(sizeof(vector));
+    vector_init(res, c->n);
+    f = (fbcsr *) malloc(sizeof(fbcsr));
+    fbcsr_makeEmpty(f, c->n, c->m, 16, 1, 16, NULL, fbcsr_row);
+    l = list_add(l, f);
+    f = (fbcsr *) malloc(sizeof(fbcsr));
+    fbcsr_makeEmpty(f, c->n, c->m, 1, 16, 16, NULL, fbcsr_column);
+    l = list_add(l, f);
+    f = (fbcsr *) malloc(sizeof(fbcsr));
+    fbcsr_makeEmpty(f, c->n, c->m, 1, 16, 16, NULL, fbcsr_backwardSlash);
+    l = list_add(l, f);
+
+    rem = csr_fbcsr(c, l, 0.7);
+
+    {
+        list *n = l;
+        while (n != NULL) {
+            printf("%d\t", ((fbcsr *) list_get(n))->nb);
+            n = list_next(n);
+        }
+    }
+
+    csr_SpMV(rem, vec, res);
+    fbcsr_SpMV(l, vec, res);
+    assert((vector_equal(ref, res)));
+
+    list_destroy(l, fbcsr_destroy);
+    csr_destroy(rem);
+    free(rem);
+    vector_destroy(res);
+    free(res);
 }
 
 void SpMV_CUDA_csr() {
@@ -151,6 +189,60 @@ void SpMV_CUDA_ubcsr() {
     list_destroy(cul, ubcsr_CUDA_destroy);
 }
 
+void SpMV_CUDA_fbcsr() {
+    list *l = NULL;
+    list *cul = NULL;
+    fbcsr *f;
+    csr *rem;
+    vector cuv, cur;
+    csr curem;
+    vector res;
+    vector_init(&res, c->n);
+    f = (fbcsr *) malloc(sizeof(fbcsr));
+    fbcsr_makeEmpty(f, c->n, c->m, 16, 1, 16, NULL, fbcsr_row);
+    l = list_add(l, f);
+    f = (fbcsr *) malloc(sizeof(fbcsr));
+    fbcsr_makeEmpty(f, c->n, c->m, 1, 16, 16, NULL, fbcsr_column);
+    l = list_add(l, f);
+    f = (fbcsr *) malloc(sizeof(fbcsr));
+    fbcsr_makeEmpty(f, c->n, c->m, 1, 16, 16, NULL, fbcsr_backwardSlash);
+    l = list_add(l, f);
+
+    f = (fbcsr *) malloc(sizeof(fbcsr));
+    fbcsr_makeEmpty(f, c->n, c->m, 16, 1, 16, fbcsr_row_krnl_16, fbcsr_row);
+    cul = list_add(cul, f);
+    f = (fbcsr *) malloc(sizeof(fbcsr));
+    fbcsr_makeEmpty(f, c->n, c->m, 1, 16, 16, fbcsr_col_krnl_16, fbcsr_column);
+    cul = list_add(cul, f);
+    f = (fbcsr *) malloc(sizeof(fbcsr));
+    fbcsr_makeEmpty(f, c->n, c->m, 1, 16, 16, fbcsr_bslash_krnl_16, fbcsr_backwardSlash);
+    cul = list_add(cul, f);
+
+    rem = csr_fbcsr(c, l, 0.7);
+
+    vector_memCpy(vec, &cuv, cpyHostToDevice);
+    vector_memCpy(&res, &cur, cpyHostToDevice);
+    csr_memCpy(rem, &curem, cpyHostToDevice);
+    fbcsr_memCpy(l, cul, cpyHostToDevice);
+
+    csr_CUDA_SpMV(&curem, &cuv, &cur);
+    fbcsr_CUDA_SpMV(cul, &cuv, &cur);
+
+    vector_destroy(&res);
+    vector_memCpy(&cur, &res, cpyDeviceToHost);
+
+    assert((vector_equal(ref, &res)));
+
+    list_destroy(l, fbcsr_destroy);
+    csr_destroy(rem);
+    free(rem);
+    vector_destroy(&res);
+    csr_CUDA_destroy(&curem);
+    vector_CUDA_destroy(&cuv);
+    vector_CUDA_destroy(&cur);
+    list_destroy(cul, fbcsr_CUDA_destroy);
+}
+
 void trans_vbr(void) {
     vector *res;
     res = (vector *) malloc(sizeof(vector));
@@ -198,27 +290,6 @@ void trans_ubcsr() {
     free(res);
 }
 
-void SpMV_fbcsr() {
-    list *l = NULL;
-    fbcsr *f;
-    csr *rem;
-    vector *res = (vector *) malloc(sizeof(vector));
-    vector_init(res, c->n);
-    f = (fbcsr *) malloc(sizeof(fbcsr));
-    fbcsr_makeEmpty(f, c->n, c->m, 1, 4, 4, NULL, fbcsr_column);
-    l = list_add(l, f);
-
-    rem = csr_fbcsr(c, l, 0.7);
-    csr_SpMV(rem, vec, res);
-    fbcsr_SpMV(l, vec, res);
-    assert((vector_equal(ref, res)));
-
-    list_destroy(l, fbcsr_destroy);
-    csr_destroy(rem);
-    free(rem);
-    vector_destroy(res);
-    free(res);
-}
 
 void trans_fbcsr() {
     list *l = NULL;
@@ -268,6 +339,7 @@ char *tNames[] = {
         "Timing",
         "SpMV using CSR+CUDA",
         "SpMV using UBCSR+CUDA",
+        "SpMV using FBCSR+CUDA",
         NULL};
 
 testFunc tFuncs[] = {
@@ -281,6 +353,7 @@ testFunc tFuncs[] = {
         timing,
         SpMV_CUDA_csr,
         SpMV_CUDA_ubcsr,
+        SpMV_CUDA_fbcsr,
         NULL};
 
 int main(int argc, char **argv) {
