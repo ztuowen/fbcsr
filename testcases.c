@@ -89,7 +89,7 @@ void SpMV_fbcsr() {
     fbcsr_makeEmpty(f, c->n, c->m, 1, 16, 16, NULL, fbcsr_backwardSlash);
     l = list_add(l, f);
 
-    rem = csr_fbcsr(c, l, 0.7);
+    rem = csr_fbcsr(c, l, 0.6);
 
     {
         list *n = l;
@@ -330,30 +330,30 @@ void timing() {
 
 char *tNames[] = {
         "SpMV using CSR as ref",
-        "SpMV using VBR",
-        "SpMV using UBCSR",
+//        "SpMV using VBR",
+//        "SpMV using UBCSR",
         "SpMV using FBCSR",
-        "Translate to VBR",
-        "Translate to UBCSR",
+//        "Translate to VBR",
+//        "Translate to UBCSR",
         "Translate using FBCSR",
-        "SpMV using CSR+CUDA",
-        "SpMV using UBCSR+CUDA",
-        "SpMV using FBCSR+CUDA",
-        "Timing",
+//        "SpMV using CSR+CUDA",
+//        "SpMV using UBCSR+CUDA",
+//        "SpMV using FBCSR+CUDA",
+//        "Timing",
         NULL};
 
 testFunc tFuncs[] = {
         SpMV_csr_ref,
-        SpMV_vbr,
-        SpMV_ubcsr,
+//        SpMV_vbr,
+//        SpMV_ubcsr,
         SpMV_fbcsr,
-        trans_vbr,
-        trans_ubcsr,
+//        trans_vbr,
+//        trans_ubcsr,
         trans_fbcsr,
-        SpMV_CUDA_csr,
-        SpMV_CUDA_ubcsr,
-        SpMV_CUDA_fbcsr,
-        timing,
+//        SpMV_CUDA_csr,
+//        SpMV_CUDA_ubcsr,
+//        SpMV_CUDA_fbcsr,
+//        timing,
         NULL};
 
 int main(int argc, char **argv) {
