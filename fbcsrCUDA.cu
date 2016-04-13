@@ -104,9 +104,10 @@ int main(int argc, char **argv) {
         fbcsr_memCpy(l, cul, cpyHostToDevice);
 
         cudaEventRecord(st, 0);
-
-        csr_CUDA_SpMV(&curem, &cuv, &cur);
-        fbcsr_CUDA_SpMV(cul, &cuv, &cur);
+        for (int i = 0; i < 500; ++i) {
+            csr_CUDA_SpMV(&curem, &cuv, &cur);
+            fbcsr_CUDA_SpMV(cul, &cuv, &cur);
+        }
 
         cudaEventRecord(ed, 0);
         cudaEventSynchronize(ed);
@@ -115,7 +116,7 @@ int main(int argc, char **argv) {
             if (opt == 1)
                 printf("%f\n", eltime);
             else
-                printf("%f\n", c.nnz / (eltime * 1000000));
+                printf("%f\n", c.nnz / (eltime * 2000));
         } else {
             list *ll = l;
             while (ll != NULL) {
