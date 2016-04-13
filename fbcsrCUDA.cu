@@ -22,6 +22,9 @@ int main(int argc, char **argv) {
             case 'd':
                 opt = 1;
                 break;
+            case 'g':
+                opt = 2;
+                break;
             default:
                 opt = 0;
         }
@@ -109,7 +112,10 @@ int main(int argc, char **argv) {
         cudaEventSynchronize(ed);
         cudaEventElapsedTime(&eltime, st, ed);
         if (opt) {
-            printf("%f\n", eltime);
+            if (opt == 1)
+                printf("%f\n", eltime);
+            else
+                printf("%f\n", c.nnz / (eltime * 1000000));
         } else {
             list *ll = l;
             while (ll != NULL) {
