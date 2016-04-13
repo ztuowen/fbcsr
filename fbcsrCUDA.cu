@@ -18,7 +18,7 @@ int main(int argc, char **argv) {
     }
     int opt = 0;
     if (argc > 2)
-        switch (argv[2][1]) {
+        switch (argv[2][0]) {
             case 'd':
                 opt = 1;
                 break;
