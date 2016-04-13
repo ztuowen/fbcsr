@@ -43,5 +43,8 @@ target_link_libraries(ubcsrCUDA cudalib ${CUDA_cusparse_LIBRARY})
 cuda_add_executable(csrCUDA csrCUDA.cu ${TESTLIB_FILES} ${LIB_FILES})
 target_link_libraries(csrCUDA cudalib ${CUDA_cusparse_LIBRARY})
 
+cuda_add_executable(hybCUDA hybCUDA.cu ${TESTLIB_FILES} ${LIB_FILES})
+target_link_libraries(hybCUDA cudalib ${CUDA_cusparse_LIBRARY})
+
 cuda_add_executable(fbcsrCUDA fbcsrCUDA.cu ${TESTLIB_FILES} ${LIB_FILES})
 target_link_libraries(fbcsrCUDA cudalib ${CUDA_cusparse_LIBRARY})
