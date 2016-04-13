@@ -7,7 +7,7 @@ SET(CUDA_SEPARABLE_COMPILATION ON)
 if (NOT DEFINED CUDA_cusparse_LIBRARY OR NOT ${CUDA_cusparse_LIBRARY})
     find_library(CUDA_cusparse_LIBRARY NAMES cusparse)
 endif()
-set(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS} -G)
+set(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS})
 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -std=gnu99")
 

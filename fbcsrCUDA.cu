@@ -71,26 +71,26 @@ int main(int argc, char **argv) {
         fbcsr_makeEmpty(f, c.n, c.m, 32, 1, 32, NULL, (void *) fbcsr_row);
         l = list_add(l, f);
         f = (fbcsr *) malloc(sizeof(fbcsr));
-        fbcsr_makeEmpty(f, c.n, c.m, 1, 32, 32, NULL, (void *) fbcsr_column);
-        l = list_add(l, f);
-        f = (fbcsr *) malloc(sizeof(fbcsr));
         fbcsr_makeEmpty(f, c.n, c.m, 1, 32, 32, NULL, (void *) fbcsr_forwardSlash);
         l = list_add(l, f);
         f = (fbcsr *) malloc(sizeof(fbcsr));
         fbcsr_makeEmpty(f, c.n, c.m, 1, 32, 32, NULL, (void *) fbcsr_backwardSlash);
+        l = list_add(l, f);
+        f = (fbcsr *) malloc(sizeof(fbcsr));
+        fbcsr_makeEmpty(f, c.n, c.m, 1, 32, 32, NULL, (void *) fbcsr_column);
         l = list_add(l, f);
 
         f = (fbcsr *) malloc(sizeof(fbcsr));
         fbcsr_makeEmpty(f, c.n, c.m, 32, 1, 32, (void *) fbcsr_row_krnl_32, (void *) fbcsr_row);
         cul = list_add(cul, f);
         f = (fbcsr *) malloc(sizeof(fbcsr));
-        fbcsr_makeEmpty(f, c.n, c.m, 1, 32, 32, (void *) fbcsr_col_krnl_32, (void *) fbcsr_column);
-        cul = list_add(cul, f);
-        f = (fbcsr *) malloc(sizeof(fbcsr));
         fbcsr_makeEmpty(f, c.n, c.m, 1, 32, 32, (void *) fbcsr_fslash_krnl_32, (void *) fbcsr_forwardSlash);
         cul = list_add(cul, f);
         f = (fbcsr *) malloc(sizeof(fbcsr));
         fbcsr_makeEmpty(f, c.n, c.m, 1, 32, 32, (void *) fbcsr_bslash_krnl_32, (void *) fbcsr_backwardSlash);
+        cul = list_add(cul, f);
+        f = (fbcsr *) malloc(sizeof(fbcsr));
+        fbcsr_makeEmpty(f, c.n, c.m, 1, 32, 32, (void *) fbcsr_col_krnl_32, (void *) fbcsr_column);
         cul = list_add(cul, f);
 
         rem = csr_fbcsr(&c, l, 0.3);
