@@ -12,9 +12,21 @@ typedef void (*testFunc)(void);
 
 int main(int argc, char **argv) {
     if (argc < 2) {
-        fprintf(stderr, "USAGE: %s <matrix.csr>", argv[0]);
+        fprintf(stderr, "USAGE: %s <matrix.csr> <opt>", argv[0]);
         return -1;
     }
+    int opt = 0;
+    if (argc > 2)
+        switch (argv[2][1]) {
+            case 'd':
+                opt = 1;
+                break;
+            case 'g':
+                opt = 2;
+                break;
+            default:
+                opt = 0;
+        }
     csr c;
     vector vec;
     vector ref;
@@ -92,7 +104,20 @@ int main(int argc, char **argv) {
         cudaEventRecord(ed, 0);
         cudaEventSynchronize(ed);
         cudaEventElapsedTime(&eltime, st, ed);
-        printf("%f\n", eltime);
+        if (opt) {
+            if (opt == 1)
+                printf("%f\n", eltime);
+            else
+                printf("%f\n", c.nnz / (eltime * 1000000));
+        } else {
+            list *ll = l;
+            while (ll != NULL) {
+                ubcsr *f = (ubcsr *) list_get(ll);
+                printf("%d\t", f->nnz);
+                ll = list_next(ll);
+            }
+            printf("\n");
+        }
 
         vector_destroy(&res);
         vector_memCpy(&cur, &res, cpyDeviceToHost);

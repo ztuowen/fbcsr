@@ -13,9 +13,18 @@ typedef void (*testFunc)(void);
 
 int main(int argc, char **argv) {
     if (argc < 2) {
-        fprintf(stderr, "USAGE: %s <matrix.csr>", argv[0]);
+        fprintf(stderr, "USAGE: %s <matrix.csr> <opt>", argv[0]);
         return -1;
     }
+    int opt = 0;
+    if (argc > 2)
+        switch (argv[2][1]) {
+            case 'd':
+                opt = 1;
+                break;
+            default:
+                opt = 0;
+        }
     csr c;
     vector vec;
     vector ref;
@@ -59,26 +68,32 @@ int main(int argc, char **argv) {
         cudaEventCreate(&ed);
         vector_init(&res, c.n);
         f = (fbcsr *) malloc(sizeof(fbcsr));
-        fbcsr_makeEmpty(f, c.n, c.m, 16, 1, 16, NULL, (void *) fbcsr_row);
+        fbcsr_makeEmpty(f, c.n, c.m, 32, 1, 32, NULL, (void *) fbcsr_row);
         l = list_add(l, f);
         f = (fbcsr *) malloc(sizeof(fbcsr));
-        fbcsr_makeEmpty(f, c.n, c.m, 1, 16, 16, NULL, (void *) fbcsr_column);
+        fbcsr_makeEmpty(f, c.n, c.m, 1, 32, 32, NULL, (void *) fbcsr_column);
         l = list_add(l, f);
         f = (fbcsr *) malloc(sizeof(fbcsr));
-        fbcsr_makeEmpty(f, c.n, c.m, 1, 16, 16, NULL, (void *) fbcsr_backwardSlash);
+        fbcsr_makeEmpty(f, c.n, c.m, 1, 32, 32, NULL, (void *) fbcsr_forwardSlash);
+        l = list_add(l, f);
+        f = (fbcsr *) malloc(sizeof(fbcsr));
+        fbcsr_makeEmpty(f, c.n, c.m, 1, 32, 32, NULL, (void *) fbcsr_backwardSlash);
         l = list_add(l, f);
 
         f = (fbcsr *) malloc(sizeof(fbcsr));
-        fbcsr_makeEmpty(f, c.n, c.m, 16, 1, 16, (void *) fbcsr_row_krnl_16, (void *) fbcsr_row);
+        fbcsr_makeEmpty(f, c.n, c.m, 32, 1, 32, (void *) fbcsr_row_krnl_32, (void *) fbcsr_row);
         cul = list_add(cul, f);
         f = (fbcsr *) malloc(sizeof(fbcsr));
-        fbcsr_makeEmpty(f, c.n, c.m, 1, 16, 16, (void *) fbcsr_col_krnl_16, (void *) fbcsr_column);
+        fbcsr_makeEmpty(f, c.n, c.m, 1, 32, 32, (void *) fbcsr_col_krnl_32, (void *) fbcsr_column);
         cul = list_add(cul, f);
         f = (fbcsr *) malloc(sizeof(fbcsr));
-        fbcsr_makeEmpty(f, c.n, c.m, 1, 16, 16, (void *) fbcsr_bslash_krnl_16, (void *) fbcsr_backwardSlash);
+        fbcsr_makeEmpty(f, c.n, c.m, 1, 32, 32, (void *) fbcsr_fslash_krnl_32, (void *) fbcsr_forwardSlash);
+        cul = list_add(cul, f);
+        f = (fbcsr *) malloc(sizeof(fbcsr));
+        fbcsr_makeEmpty(f, c.n, c.m, 1, 32, 32, (void *) fbcsr_bslash_krnl_32, (void *) fbcsr_backwardSlash);
         cul = list_add(cul, f);
 
-        rem = csr_fbcsr(&c, l, 0.7);
+        rem = csr_fbcsr(&c, l, 0.3);
 
         vector_memCpy(&vec, &cuv, cpyHostToDevice);
         vector_memCpy(&res, &cur, cpyHostToDevice);
@@ -93,7 +108,17 @@ int main(int argc, char **argv) {
         cudaEventRecord(ed, 0);
         cudaEventSynchronize(ed);
         cudaEventElapsedTime(&eltime, st, ed);
-        printf("%f\n", eltime);
+        if (opt) {
+            printf("%f\n", eltime);
+        } else {
+            list *ll = l;
+            while (ll != NULL) {
+                fbcsr *f = (fbcsr *) list_get(ll);
+                printf("%d\t", f->nnz);
+                ll = list_next(ll);
+            }
+            printf("\n");
+        }
 
         vector_destroy(&res);
         vector_memCpy(&cur, &res, cpyDeviceToHost);

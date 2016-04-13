@@ -46,15 +46,16 @@ coo fbcsr_backwardSlash(int elemIndx, int elemCnt) {
     return c;
 }
 
-int *bestseq(int *score, int *ids, int n, int con, int *tot) {
+int *bestseq(int *score, int *ids, int n, int maxn, int con, int *tot) {
     int i;
     int *sel;
     int nxt;
     sel = malloc((n+1)*sizeof(int));
     memset(sel,0,(n+1)*sizeof(int));
     nxt = 0;
+    ids[n] = maxn;
     for (i=0;i<n;++i) {
-        while (nxt < n && ids[nxt] < ids[i] + con)
+        while (nxt <= n && ids[nxt] < ids[i] + con)
             ++nxt;
         if (nxt <= n)
             sel[nxt] = max(sel[nxt], sel[i] + score[i]);
@@ -64,7 +65,7 @@ int *bestseq(int *score, int *ids, int n, int con, int *tot) {
     int sc = sel[n];
     int li = n;
     nxt = n - 1;
-    int lstp = MAXCOL;
+    int lstp = maxn - con;
     *tot=0;
     while (nxt >= 0) {
         while (nxt > 0 && ids[nxt] > lstp)
@@ -178,8 +179,8 @@ void fbcsrSingle_SpMV(fbcsr *f, vector *v, vector *r) {
                 coo c = getCoo(k, f->nelem);
                 c.r += f->rptr[i];
                 c.c += f->bindx[j];
-                if (c.r < f->n && c.c < f->m)
-                    r->val[c.r] += v->val[c.c] * (*val);
+                //if (c.r < f->n && c.c < f->m)
+                r->val[c.r] += v->val[c.c] * (*val);
             }
         }
 }
@@ -229,6 +230,7 @@ csr *fbcsr_csr_splitOnce(csr *c, fbcsr *f, float thresh) {
     int *rowsc = malloc(f->m*sizeof(int));
     int *colsc = malloc(f->n*sizeof(int));
     int *ids = malloc((max(f->m, f->n) + 1) * sizeof(int));
+    int *rowbk = malloc(f->n * sizeof(int));
     csr *last = malloc(sizeof(csr));
     csr_makeEmpty(last, c->n, c->m);
     csr_merge(last, c);
@@ -264,23 +266,26 @@ csr *fbcsr_csr_splitOnce(csr *c, fbcsr *f, float thresh) {
                     ++cnt;
             }
             if (cnt >= thresh * f->nelem) {
-                colsc[selc] = 1;
+                colsc[selc] = cnt;
                 ids[selc++] = col;
             }
             col = mincol;
         }
-        sel = bestseq(colsc, ids, selc, f->c, &tot);
-        assert(tot == sel[selc]);
+        sel = bestseq(colsc, ids, selc, f->m, f->c, &tot);
+        rowsc[row] = sel[selc];
+        rowbk[row] = tot;
         free(sel);
-        rowsc[row] = tot;
     }
 
     // Get the best row decomposition
     for (row = 0; row < f->n; ++row)
         ids[row] = row;
-    sel = bestseq(rowsc, ids, c->n, f->r, &tot);
+    sel = bestseq(rowsc, ids, c->n, f->n, f->r, &tot);
     f->nr = tot;
-    f->nb = sel[f->n];
+    f->nb = 0;
+    for (row = 0; row < f->n; ++row)
+        if (sel[row])
+            f->nb += rowbk[row];
     f->rptr = malloc((f->nr) * sizeof(int));
     int r;
     r = 0;
@@ -310,12 +315,12 @@ csr *fbcsr_csr_splitOnce(csr *c, fbcsr *f, float thresh) {
                     ++cnt;
             }
             if (cnt >= thresh * f->nelem) {
-                colsc[selc] = 1;
+                colsc[selc] = cnt;
                 ids[selc++] = col;
             }
             col = mincol;
         }
-        sel = bestseq(colsc, ids, selc, f->c, &tot);
+        sel = bestseq(colsc, ids, selc, f->m, f->c, &tot);
         int cc;
         for (cc = 0; cc < selc; ++cc)
             if (sel[cc] == 1) {
@@ -354,6 +359,7 @@ csr *fbcsr_csr_splitOnce(csr *c, fbcsr *f, float thresh) {
     free(rowsc);
     free(colsc);
     free(ids);
+    free(rowbk);
     return last;
 }
 

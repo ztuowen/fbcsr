@@ -22,7 +22,8 @@ __global__ void FBCSR_general_krnl(fbcsr f, vector v, vector r) {
     int ncol = colm * idx;
     rr += nrow;
     elem_t acc = 0;
-    for (int i = f.bptr[row] + me; i < f.bptr[row + 1] && ((rc = f.bindx[i] + ncol) < f.m); i += workGroup) {
+    for (int i = f.bptr[row] + me; i < f.bptr[row + 1]; i += workGroup) {
+        rc = f.bindx[i] + ncol;
         acc += v.val[rc] * f.val[i * nelem + idx];
     }
     if (rowm == 0) { // there is no row difference
@@ -45,48 +46,48 @@ __global__ void FBCSR_general_krnl(fbcsr f, vector v, vector r) {
             red[me][nrow] += red[me + tot][nrow];
             __syncthreads();
         }
-        if (me == 0) if (rr < f.n)
+        if (me == 0)
             r.val[rr] += red[0][nrow];
     }
 };
 
 extern "C" void fbcsr_row_krnl_16(fbcsr *f, vector *v, vector *r) {
-    dim3 block(f->nr), thread(256);
-    FBCSR_general_krnl < 256, 16, 0, 0, 1 ><<<block, thread>>>(*f, *v, *r);
+    dim3 block(f->nr), thread(128);
+    FBCSR_general_krnl < 128, 16, 0, 0, 1 ><<<block, thread>>>(*f, *v, *r);
 }
 
 extern "C" void fbcsr_row_krnl_32(fbcsr *f, vector *v, vector *r) {
-    dim3 block(f->nr), thread(256);
-    FBCSR_general_krnl < 256, 32, 0, 0, 1 ><<<block, thread>>>(*f, *v, *r);
+    dim3 block(f->nr), thread(128);
+    FBCSR_general_krnl < 128, 32, 0, 0, 1 ><<<block, thread>>>(*f, *v, *r);
 }
 
 extern "C" void fbcsr_col_krnl_16(fbcsr *f, vector *v, vector *r) {
-    dim3 block(f->nr), thread(256);
-    FBCSR_general_krnl < 256, 16, 0, 1, 0 ><<<block, thread>>>(*f, *v, *r);
+    dim3 block(f->nr), thread(128);
+    FBCSR_general_krnl < 128, 16, 0, 1, 0 ><<<block, thread>>>(*f, *v, *r);
 }
 
 extern "C" void fbcsr_col_krnl_32(fbcsr *f, vector *v, vector *r) {
-    dim3 block(f->nr), thread(256);
-    FBCSR_general_krnl < 256, 32, 0, 1, 0 ><<<block, thread>>>(*f, *v, *r);
+    dim3 block(f->nr), thread(128);
+    FBCSR_general_krnl < 128, 32, 0, 1, 0 ><<<block, thread>>>(*f, *v, *r);
 }
 
 extern "C" void fbcsr_fslash_krnl_16(fbcsr *f, vector *v, vector *r) {
-    dim3 block(f->nr), thread(256);
-    FBCSR_general_krnl < 256, 16, 15, -1, 1 ><<<block, thread>>>(*f, *v, *r);
+    dim3 block(f->nr), thread(128);
+    FBCSR_general_krnl < 128, 16, 15, -1, 1 ><<<block, thread>>>(*f, *v, *r);
 }
 
 extern "C" void fbcsr_fslash_krnl_32(fbcsr *f, vector *v, vector *r) {
-    dim3 block(f->nr), thread(256);
-    FBCSR_general_krnl < 256, 32, 31, -1, 1 ><<<block, thread>>>(*f, *v, *r);
+    dim3 block(f->nr), thread(128);
+    FBCSR_general_krnl < 128, 32, 31, -1, 1 ><<<block, thread>>>(*f, *v, *r);
 }
 
 extern "C" void fbcsr_bslash_krnl_16(fbcsr *f, vector *v, vector *r) {
-    dim3 block(f->nr), thread(256);
-    FBCSR_general_krnl < 256, 16, 0, 1, 1 ><<<block, thread>>>(*f, *v, *r);
+    dim3 block(f->nr), thread(128);
+    FBCSR_general_krnl < 128, 16, 0, 1, 1 ><<<block, thread>>>(*f, *v, *r);
 }
 
 extern "C" void fbcsr_bslash_krnl_32(fbcsr *f, vector *v, vector *r) {
-    dim3 block(f->nr), thread(256);
-    FBCSR_general_krnl < 256, 32, 0, 1, 1 ><<<block, thread>>>(*f, *v, *r);
+    dim3 block(f->nr), thread(128);
+    FBCSR_general_krnl < 128, 32, 0, 1, 1 ><<<block, thread>>>(*f, *v, *r);
 }
 

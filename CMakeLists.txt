@@ -7,7 +7,7 @@ SET(CUDA_SEPARABLE_COMPILATION ON)
 if (NOT DEFINED CUDA_cusparse_LIBRARY OR NOT ${CUDA_cusparse_LIBRARY})
     find_library(CUDA_cusparse_LIBRARY NAMES cusparse)
 endif()
-set(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS})
+set(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS} -G)
 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -std=gnu99")
 
@@ -42,6 +42,3 @@ target_link_libraries(ubcsrCUDA cudalib ${CUDA_cusparse_LIBRARY})
 
 cuda_add_executable(fbcsrCUDA fbcsrCUDA.cu ${TESTLIB_FILES} ${LIB_FILES})
 target_link_libraries(fbcsrCUDA cudalib ${CUDA_cusparse_LIBRARY})
-
-cuda_add_executable(cudaSample cudaSample.cu)
-cuda_add_cublas_to_target( cudaSample )
