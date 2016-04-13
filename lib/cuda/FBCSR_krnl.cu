@@ -88,7 +88,7 @@ extern "C" void fbcsr_row_krnl_16(fbcsr *f, vector *v, vector *r) {
     } else if (f->nnz / f->nr > 64) {
         dim3 block((f->nr + 1) / 2), thread(32);
         FBCSR_general_krnl < 32, 16, 0, 0, 1, 2 ><<<block, thread>>>(*f, *v, *r);
-    } else if (f->nnz / f->nr > 32) {
+    } else if (f->nnz / f->nr > 32 || f->nr < 400) {
         dim3 block((f->nr + 3) / 4), thread(32);
         FBCSR_general_krnl < 32, 16, 0, 0, 1, 4 ><<<block, thread>>>(*f, *v, *r);
     } else {
@@ -110,7 +110,7 @@ extern "C" void fbcsr_row_krnl_32(fbcsr *f, vector *v, vector *r) {
     } else if (f->nnz / f->nr > 64) {
         dim3 block((f->nr + 1) / 2), thread(32);
         FBCSR_general_krnl < 32, 32, 0, 0, 1, 2 ><<<block, thread>>>(*f, *v, *r);
-    } else if (f->nnz / f->nr > 32) {
+    } else if (f->nnz / f->nr > 32 || f->nr < 400) {
         dim3 block((f->nr + 3) / 4), thread(32);
         FBCSR_general_krnl < 32, 32, 0, 0, 1, 4 ><<<block, thread>>>(*f, *v, *r);
     } else {
@@ -137,7 +137,7 @@ extern "C" void fbcsr_col_krnl_32(fbcsr *f, vector *v, vector *r) {
     } else if (f->nnz / f->nr > 64) {
         dim3 block((f->nr + 1) / 2), thread(32);
         FBCSR_general_krnl < 32, 32, 0, 1, 0, 2 ><<<block, thread>>>(*f, *v, *r);
-    } else if (f->nnz / f->nr > 32) {
+    } else if (f->nnz / f->nr > 32 || f->nr < 400) {
         dim3 block((f->nr + 3) / 4), thread(32);
         FBCSR_general_krnl < 32, 32, 0, 1, 0, 4 ><<<block, thread>>>(*f, *v, *r);
     } else {
@@ -164,7 +164,7 @@ extern "C" void fbcsr_fslash_krnl_32(fbcsr *f, vector *v, vector *r) {
     } else if (f->nnz / f->nr > 64) {
         dim3 block((f->nr + 1) / 2), thread(32);
         FBCSR_general_krnl < 32, 32, 31, -1, 1, 2 ><<<block, thread>>>(*f, *v, *r);
-    } else if (f->nnz / f->nr > 32) {
+    } else if (f->nnz / f->nr > 32 || f->nr < 400) {
         dim3 block((f->nr + 3) / 4), thread(32);
         FBCSR_general_krnl < 32, 32, 31, -1, 1, 4 ><<<block, thread>>>(*f, *v, *r);
     } else {
@@ -191,7 +191,7 @@ extern "C" void fbcsr_bslash_krnl_32(fbcsr *f, vector *v, vector *r) {
     } else if (f->nnz / f->nr > 64) {
         dim3 block((f->nr + 1) / 2), thread(32);
         FBCSR_general_krnl < 32, 32, 0, 1, 1, 2 ><<<block, thread>>>(*f, *v, *r);
-    } else if (f->nnz / f->nr > 32) {
+    } else if (f->nnz / f->nr > 32 || f->nr < 400) {
         dim3 block((f->nr + 3) / 4), thread(32);
         FBCSR_general_krnl < 32, 32, 0, 1, 1, 4 ><<<block, thread>>>(*f, *v, *r);
     } else {

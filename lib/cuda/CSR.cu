@@ -17,10 +17,10 @@ extern "C" void csr_memCpy(csr *src, csr *dst, enum DeviceCopyDIR dir) {
 
 extern "C" void csr_CUDA_SpMV(csr *m, vector *v, vector *r) {
     cusparseMatDescr_t descr = 0;
+    cusparseHandle_t handle = 0;
     cuSparseCheck(cusparseCreateMatDescr(&descr));
     cuSparseCheck(cusparseSetMatType(descr, CUSPARSE_MATRIX_TYPE_GENERAL));
     cuSparseCheck(cusparseSetMatIndexBase(descr, CUSPARSE_INDEX_BASE_ZERO));
-    cusparseHandle_t handle;
     cuSparseCheck(cusparseCreate(&handle));
     elem_t unit = 1;
             cusparseScsrmv(handle, CUSPARSE_OPERATION_NON_TRANSPOSE, m->n, m->m, m->nnz, &unit, descr, m->val, m->ptr,

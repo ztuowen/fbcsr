@@ -8,6 +8,7 @@
 #include"FBCSR.h"
 #include"FBCSR_krnl.h"
 
+#define TOTALRUNS 1000
 
 typedef void (*testFunc)(void);
 
@@ -74,10 +75,10 @@ int main(int argc, char **argv) {
         fbcsr_makeEmpty(f, c.n, c.m, 32, 1, 32, NULL, (void *) fbcsr_row);
         l = list_add(l, f);
         f = (fbcsr *) malloc(sizeof(fbcsr));
-        fbcsr_makeEmpty(f, c.n, c.m, 1, 32, 32, NULL, (void *) fbcsr_forwardSlash);
+        fbcsr_makeEmpty(f, c.n, c.m, 1, 32, 32, NULL, (void *) fbcsr_backwardSlash);
         l = list_add(l, f);
         f = (fbcsr *) malloc(sizeof(fbcsr));
-        fbcsr_makeEmpty(f, c.n, c.m, 1, 32, 32, NULL, (void *) fbcsr_backwardSlash);
+        fbcsr_makeEmpty(f, c.n, c.m, 1, 32, 32, NULL, (void *) fbcsr_forwardSlash);
         l = list_add(l, f);
         f = (fbcsr *) malloc(sizeof(fbcsr));
         fbcsr_makeEmpty(f, c.n, c.m, 1, 32, 32, NULL, (void *) fbcsr_column);
@@ -87,10 +88,10 @@ int main(int argc, char **argv) {
         fbcsr_makeEmpty(f, c.n, c.m, 32, 1, 32, (void *) fbcsr_row_krnl_32, (void *) fbcsr_row);
         cul = list_add(cul, f);
         f = (fbcsr *) malloc(sizeof(fbcsr));
-        fbcsr_makeEmpty(f, c.n, c.m, 1, 32, 32, (void *) fbcsr_fslash_krnl_32, (void *) fbcsr_forwardSlash);
+        fbcsr_makeEmpty(f, c.n, c.m, 1, 32, 32, (void *) fbcsr_bslash_krnl_32, (void *) fbcsr_backwardSlash);
         cul = list_add(cul, f);
         f = (fbcsr *) malloc(sizeof(fbcsr));
-        fbcsr_makeEmpty(f, c.n, c.m, 1, 32, 32, (void *) fbcsr_bslash_krnl_32, (void *) fbcsr_backwardSlash);
+        fbcsr_makeEmpty(f, c.n, c.m, 1, 32, 32, (void *) fbcsr_fslash_krnl_32, (void *) fbcsr_forwardSlash);
         cul = list_add(cul, f);
         f = (fbcsr *) malloc(sizeof(fbcsr));
         fbcsr_makeEmpty(f, c.n, c.m, 1, 32, 32, (void *) fbcsr_col_krnl_32, (void *) fbcsr_column);
@@ -103,18 +104,18 @@ int main(int argc, char **argv) {
         csr_memCpy(rem, &curem, cpyHostToDevice);
         fbcsr_memCpy(l, cul, cpyHostToDevice);
 
-        cudaEventRecord(st, 0);
-        for (int i = 0; i < 500; ++i) {
-            csr_CUDA_SpMV(&curem, &cuv, &cur);
-            fbcsr_CUDA_SpMV(cul, &cuv, &cur);
-        }
-
-        cudaEventRecord(ed, 0);
-        cudaEventSynchronize(ed);
-        cudaEventElapsedTime(&eltime, st, ed);
         if (opt) {
+            cudaEventRecord(st, 0);
+            for (int i = 0; i < TOTALRUNS; ++i) {
+                csr_CUDA_SpMV(&curem, &cuv, &cur);
+                fbcsr_CUDA_SpMV(cul, &cuv, &cur);
+            }
+            cudaEventRecord(ed, 0);
+            cudaEventSynchronize(ed);
+            cudaEventElapsedTime(&eltime, st, ed);
+
             if (opt == 1)
-                printf("%f\n", eltime);
+                printf("%f\n", eltime / TOTALRUNS);
             else
                 printf("%f\n", c.nnz / (eltime * 2000));
         } else {
@@ -126,6 +127,10 @@ int main(int argc, char **argv) {
             }
             printf("\n");
         }
+        vector_memCpy(&res, &cur, cpyHostToDevice);
+
+        csr_CUDA_SpMV(&curem, &cuv, &cur);
+        fbcsr_CUDA_SpMV(cul, &cuv, &cur);
 
         vector_destroy(&res);
         vector_memCpy(&cur, &res, cpyDeviceToHost);
