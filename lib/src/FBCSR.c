@@ -281,18 +281,23 @@ csr *fbcsr_csr_splitOnce(csr *c, fbcsr *f, float thresh) {
     for (row = 0; row < f->n; ++row)
         ids[row] = row;
     sel = bestseq(rowsc, ids, c->n, f->n, f->r, &tot);
-    f->nr = tot;
-    f->nb = 0;
-    for (row = 0; row < f->n; ++row)
-        if (sel[row])
-            f->nb += rowbk[row];
-    f->rptr = malloc((f->nr) * sizeof(int));
     int r;
-    r = 0;
-    for (row = 0; row < f->n; ++row)
-        if (sel[row] == 1)
-            f->rptr[r++] = row;
-
+    if (0.1 * c->nnz > sel[c->n]) {
+        f->nr = 0;
+        f->nb = 0;
+        f->rptr = malloc((f->nr) * sizeof(int));
+    } else {
+        f->nr = tot;
+        f->nb = 0;
+        for (row = 0; row < f->n; ++row)
+            if (sel[row])
+                f->nb += rowbk[row];
+        f->rptr = malloc((f->nr) * sizeof(int));
+        r = 0;
+        for (row = 0; row < f->n; ++row)
+            if (sel[row] == 1)
+                f->rptr[r++] = row;
+    }
     // Now we have how many columns and how many rows that it has.
     f->val = malloc(f->nelem * f->nb * sizeof(elem_t));
     f->bindx = malloc(f->nb * sizeof(int));

@@ -16,17 +16,17 @@ int main(int argc, char **argv) {
         fprintf(stderr, "USAGE: %s <matrix.csr> <opt>", argv[0]);
         return -1;
     }
-    int opt = 0;
+    int opt = 1;
     if (argc > 2)
         switch (argv[2][0]) {
             case 'd':
-                opt = 1;
+                opt = 0;
                 break;
             case 'g':
                 opt = 2;
                 break;
             default:
-                opt = 0;
+                opt = 1;
         }
     csr c;
     vector vec;
@@ -129,8 +129,10 @@ int main(int argc, char **argv) {
         vector_destroy(&res);
         vector_memCpy(&cur, &res, cpyDeviceToHost);
 
-        if (!vector_equal(&ref, &res))
+        if (!vector_equal(&ref, &res)) {
+            fprintf(stderr, "Result mismatch\n");
             return -1;
+        }
 
         cudaEventDestroy(st);
         cudaEventDestroy(ed);
