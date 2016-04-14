@@ -15,6 +15,7 @@ extern "C" {
 #endif
 
 typedef struct fbcsr {
+    float thresh;
     int n, m;
     int c, r;
     int nr;
@@ -38,7 +39,7 @@ typedef void (*fbcsrSingle_SpMVKernel)(fbcsr *f, vector *v, vector *r);
 
 typedef coo (*fbcsr_getCoo)(int elemIndx, int elemCnt);
 
-void fbcsr_makeEmpty(fbcsr *f, int n, int m, int c, int r, int nelem, void *optKrnl, void *getCoo);
+void fbcsr_makeEmpty(fbcsr *f, int n, int m, int c, int r, int nelem, float thresh, void *optKrnl, void *getCoo);
 
 coo fbcsr_row(int elemIndx, int elemCnt);
 
@@ -48,7 +49,7 @@ coo fbcsr_forwardSlash(int elemIndx, int elemCnt);
 
 coo fbcsr_backwardSlash(int elemIndx, int elemCnt);
 
-csr *csr_fbcsr(csr *c, list *l, float thresh);    // c,r information embedded in list of ubcsr
+csr *csr_fbcsr(csr *c, list *l);    // c,r information embedded in list of ubcsr
 // Easier to just return the remainder, TODO it is against convention
 void fbcsr_csr(list *l, csr *rem, csr *c);
 

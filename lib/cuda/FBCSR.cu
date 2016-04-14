@@ -14,6 +14,7 @@ void fbcsrSingle_memCpy(fbcsr *src, fbcsr *dst, enum DeviceCopyDIR dir) {
     dst->nr = src->nr;
     dst->nb = src->nb;
     dst->nelem = src->nelem;
+    dst->thresh = src->thresh;
     memCopy((void **) &(dst->rptr), (void *) src->rptr, sizeof(int) * src->nr, dir);
     memCopy((void **) &(dst->bptr), (void *) src->bptr, sizeof(int) * (src->nr + 1), dir);
     memCopy((void **) &(dst->val), (void *) src->val, sizeof(elem_t) * src->nb * src->nelem, dir);

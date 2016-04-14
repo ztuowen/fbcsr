@@ -37,7 +37,8 @@ void SpMV_vbr(void) {
     csr_vbr(c, v, 0.8);
     vbr_SpMV(v, vec, res);
 
-    assert((vector_equal(ref, res)));
+    if (!vector_equal(ref, res))
+        fprintf(stderr, "Result mismatch!\n");
 
     vector_destroy(res);
     free(res);
@@ -65,7 +66,8 @@ void SpMV_ubcsr() {
     csr_SpMV(rem, vec, &res);
     ubcsr_SpMV(l, vec, &res);
 
-    assert((vector_equal(ref, &res)));
+    if (!vector_equal(ref, &res))
+        fprintf(stderr, "Result mismatch!\n");
 
     list_destroy(l, ubcsr_destroy);
     csr_destroy(rem);
@@ -101,7 +103,8 @@ void SpMV_fbcsr() {
 
     csr_SpMV(rem, vec, res);
     fbcsr_SpMV(l, vec, res);
-    assert((vector_equal(ref, res)));
+    if (!vector_equal(ref, res))
+        fprintf(stderr, "Result mismatch!\n");
 
     list_destroy(l, fbcsr_destroy);
     csr_destroy(rem);
@@ -126,7 +129,8 @@ void SpMV_CUDA_csr() {
     vector_destroy(&res);
     vector_memCpy(&cur, &res, cpyDeviceToHost);
 
-    assert((vector_equal(ref, &res)));
+    if (!vector_equal(ref, &res))
+        fprintf(stderr, "Result mismatch!\n");
 
     vector_destroy(&res);
     csr_CUDA_destroy(&cum);
@@ -177,7 +181,8 @@ void SpMV_CUDA_ubcsr() {
     vector_destroy(&res);
     vector_memCpy(&cur, &res, cpyDeviceToHost);
 
-    assert((vector_equal(ref, &res)));
+    if (!vector_equal(ref, &res))
+        fprintf(stderr, "Result mismatch!\n");
 
     list_destroy(l, ubcsr_destroy);
     csr_destroy(rem);
@@ -199,26 +204,26 @@ void SpMV_CUDA_fbcsr() {
     vector res;
     vector_init(&res, c->n);
     f = (fbcsr *) malloc(sizeof(fbcsr));
-    fbcsr_makeEmpty(f, c->n, c->m, 16, 1, 16, NULL, fbcsr_row);
+    fbcsr_makeEmpty(f, c->n, c->m, 16, 1, 16, 0.5, NULL, fbcsr_row);
     l = list_add(l, f);
     f = (fbcsr *) malloc(sizeof(fbcsr));
-    fbcsr_makeEmpty(f, c->n, c->m, 1, 16, 16, NULL, fbcsr_column);
+    fbcsr_makeEmpty(f, c->n, c->m, 1, 16, 16, 0.5, NULL, fbcsr_column);
     l = list_add(l, f);
     f = (fbcsr *) malloc(sizeof(fbcsr));
-    fbcsr_makeEmpty(f, c->n, c->m, 1, 16, 16, NULL, fbcsr_backwardSlash);
+    fbcsr_makeEmpty(f, c->n, c->m, 1, 16, 16, 0.5, NULL, fbcsr_backwardSlash);
     l = list_add(l, f);
 
     f = (fbcsr *) malloc(sizeof(fbcsr));
-    fbcsr_makeEmpty(f, c->n, c->m, 16, 1, 16, fbcsr_row_krnl_16, fbcsr_row);
+    fbcsr_makeEmpty(f, c->n, c->m, 16, 1, 16, 0.5, fbcsr_row_krnl_16, fbcsr_row);
     cul = list_add(cul, f);
     f = (fbcsr *) malloc(sizeof(fbcsr));
-    fbcsr_makeEmpty(f, c->n, c->m, 1, 16, 16, fbcsr_col_krnl_16, fbcsr_column);
+    fbcsr_makeEmpty(f, c->n, c->m, 1, 16, 16, 0.5, fbcsr_col_krnl_16, fbcsr_column);
     cul = list_add(cul, f);
     f = (fbcsr *) malloc(sizeof(fbcsr));
-    fbcsr_makeEmpty(f, c->n, c->m, 1, 16, 16, fbcsr_bslash_krnl_16, fbcsr_backwardSlash);
+    fbcsr_makeEmpty(f, c->n, c->m, 1, 16, 16, 0.5, fbcsr_bslash_krnl_16, fbcsr_backwardSlash);
     cul = list_add(cul, f);
 
-    rem = csr_fbcsr(c, l, 0.7);
+    rem = csr_fbcsr(c, l);
 
     vector_memCpy(vec, &cuv, cpyHostToDevice);
     vector_memCpy(&res, &cur, cpyHostToDevice);
@@ -232,6 +237,8 @@ void SpMV_CUDA_fbcsr() {
     vector_memCpy(&cur, &res, cpyDeviceToHost);
 
     assert((vector_equal(ref, &res)));
+    if (!vector_equal(ref, &res))
+        fprintf(stderr, "Result mismatch!\n");
 
     list_destroy(l, fbcsr_destroy);
     csr_destroy(rem);
@@ -254,7 +261,8 @@ void trans_vbr(void) {
     vbr_csr(v, nc);
     csr_SpMV(nc, vec, res);
 
-    assert((vector_equal(ref, res)));
+    if (!vector_equal(ref, res))
+        fprintf(stderr, "Result mismatch!\n");
 
     csr_destroy(nc);
     free(nc);
@@ -376,7 +384,6 @@ int main(int argc, char **argv) {
         printf("OK\n");
         ++i;
     }
-    printf("Hooray~!!!!! It is ready to exit, that means:\n1. We don't have any errors.\n2. The tests are not comprehensive.\n");
     csr_destroy(c);
     free(c);
     vector_destroy(vec);

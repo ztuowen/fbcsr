@@ -148,38 +148,19 @@ extern "C" void fbcsr_row_krnl_16(fbcsr *f, vector *v, vector *r) {
 }
 
 extern "C" void fbcsr_row_krnl_32(fbcsr *f, vector *v, vector *r) {
-    if (f->nnz / f->nr > 512) {
-        dim3 block(f->nr), thread(128);
-        FBCSR_row_krnl < 128, 32, 128, 1 ><<<block, thread>>>(*f, *v, *r);
-    } else if (f->nnz / f->nr > 256) {
-        dim3 block(f->nr), thread(64);
-        FBCSR_row_krnl < 64, 32, 64, 1 ><<<block, thread>>>(*f, *v, *r);
-    } else if (f->nnz / f->nr > 128) {
+    if (f->nnz / f->nr > 128) {
         dim3 block((f->nr + 15) / 16), thread(128);
         FBCSR_row_krnl < 128, 32, 64, 16 ><<<block, thread>>>(*f, *v, *r);
+    } else if (f->nnz / f->nr > 64) {
+        dim3 block((f->nr + 15) / 16), thread(64);
+        FBCSR_row_krnl < 64, 32, 64, 16 ><<<block, thread>>>(*f, *v, *r);
+    } else if (f->nnz / f->nr > 48) {
+        dim3 block((f->nr + 15) / 16), thread(64);
+        FBCSR_row_krnl < 64, 32, 32, 16 ><<<block, thread>>>(*f, *v, *r);
     } else {
         dim3 block((f->nr + 31) / 32), thread(64);
         FBCSR_row_krnl < 64, 32, 32, 32 ><<<block, thread>>>(*f, *v, *r);
     }
-    /*if (f->nnz / f->nr > 512) {
-        dim3 block(f->nr), thread(128);
-        FBCSR_general_krnl < 128, 32, 0, 0, 1 ><<<block, thread>>>(*f, *v, *r);
-    } else if (f->nnz / f->nr > 256) {
-        dim3 block(f->nr), thread(64);
-        FBCSR_general_krnl < 64, 32, 0, 0, 1 ><<<block, thread>>>(*f, *v, *r);
-    } else if (f->nnz / f->nr > 128) {
-        dim3 block(f->nr), thread(32);
-        FBCSR_general_krnl < 32, 32, 0, 0, 1 ><<<block, thread>>>(*f, *v, *r);
-    } else if (f->nnz / f->nr > 64) {
-        dim3 block((f->nr + 1) / 2), thread(32);
-        FBCSR_general_krnl < 32, 32, 0, 0, 1 ><<<block, thread>>>(*f, *v, *r);
-    } else if (f->nnz / f->nr > 32 || f->nr < 400) {
-        dim3 block((f->nr + 3) / 4), thread(32);
-        FBCSR_general_krnl < 32, 32, 0, 0, 1 ><<<block, thread>>>(*f, *v, *r);
-    } else {
-        dim3 block((f->nr + 7) / 8), thread(32);
-        FBCSR_general_krnl < 32, 32, 0, 0, 1 ><<<block, thread>>>(*f, *v, *r);
-    }*/
 }
 
 extern "C" void fbcsr_col_krnl_16(fbcsr *f, vector *v, vector *r) {

@@ -8,11 +8,12 @@
 #define MAXCOL 1048576
 #define CUTOFF 0.1
 
-void fbcsr_makeEmpty(fbcsr *f, int n, int m, int c, int r, int nelem, void *optKrnl, void *getCoo) {
+void fbcsr_makeEmpty(fbcsr *f, int n, int m, int c, int r, int nelem, float thresh, void *optKrnl, void *getCoo) {
     f->n = n;
     f->m = m;
     f->c = c;
     f->r = r;
+    f->thresh = thresh;
     f->optKernel = optKrnl;
     f->nelem = nelem;
     f->optKernel = optKrnl;
@@ -370,19 +371,19 @@ csr *fbcsr_csr_splitOnce(csr *c, fbcsr *f, float thresh) {
     return last;
 }
 
-csr *csr_fbcsr(csr *c, list *l, float thresh) {
+csr *csr_fbcsr(csr *c, list *l) {
     fbcsr *f;
     csr *r;
     csr *last = NULL;
 
     if (l != NULL) {
         f = (fbcsr *) list_get(l);
-        last = fbcsr_csr_splitOnce(c, f, thresh);
+        last = fbcsr_csr_splitOnce(c, f, f->thresh);
         l = list_next(l);
         while (l != NULL) {
             f = (fbcsr *) list_get(l);
 
-            r = fbcsr_csr_splitOnce(last, f, thresh);
+            r = fbcsr_csr_splitOnce(last, f, f->thresh);
 
             // setup for next iter
             l = list_next(l);
