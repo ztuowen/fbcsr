@@ -82,16 +82,16 @@ void SpMV_fbcsr() {
     vector *res = (vector *) malloc(sizeof(vector));
     vector_init(res, c->n);
     f = (fbcsr *) malloc(sizeof(fbcsr));
-    fbcsr_makeEmpty(f, c->n, c->m, 16, 1, 16, NULL, fbcsr_row);
+    fbcsr_makeEmpty(f, c->n, c->m, 16, 1, 16, 0.5, NULL, fbcsr_row);
     l = list_add(l, f);
     f = (fbcsr *) malloc(sizeof(fbcsr));
-    fbcsr_makeEmpty(f, c->n, c->m, 1, 16, 16, NULL, fbcsr_column);
+    fbcsr_makeEmpty(f, c->n, c->m, 1, 16, 16, 0.5, NULL, fbcsr_column);
     l = list_add(l, f);
     f = (fbcsr *) malloc(sizeof(fbcsr));
-    fbcsr_makeEmpty(f, c->n, c->m, 1, 16, 16, NULL, fbcsr_backwardSlash);
+    fbcsr_makeEmpty(f, c->n, c->m, 1, 16, 16, 0.5, NULL, fbcsr_backwardSlash);
     l = list_add(l, f);
 
-    rem = csr_fbcsr(c, l, 0.6);
+    rem = csr_fbcsr(c, l);
 
     {
         list *n = l;
@@ -307,10 +307,10 @@ void trans_fbcsr() {
     vector *res = (vector *) malloc(sizeof(vector));
     vector_init(res, c->n);
     f = (fbcsr *) malloc(sizeof(fbcsr));
-    fbcsr_makeEmpty(f, c->n, c->m, 1, 4, 4, NULL, fbcsr_column);
+    fbcsr_makeEmpty(f, c->n, c->m, 1, 4, 4, 0.5, NULL, fbcsr_column);
     l = list_add(l, f);
 
-    rem = csr_fbcsr(c, l, 0.7);
+    rem = csr_fbcsr(c, l);
     fbcsr_csr(l, rem, nc);
     csr_SpMV(nc, vec, res);
     assert((vector_equal(ref, res)));
