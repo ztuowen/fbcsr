@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.8)
 project(matrixRep)
 
-find_package(CUDA)
+find_package(CUDA REQUIRED)
 SET(CUDA_SEPARABLE_COMPILATION ON)
 
 if (NOT DEFINED CUDA_cusparse_LIBRARY OR NOT ${CUDA_cusparse_LIBRARY})
@@ -46,8 +46,8 @@ target_link_libraries(csrCUDA cudalib ${CUDA_cusparse_LIBRARY})
 cuda_add_executable(hybCUDA hybCUDA.cu ${TESTLIB_FILES} ${LIB_FILES})
 target_link_libraries(hybCUDA cudalib ${CUDA_cusparse_LIBRARY})
 
-cuda_add_executable(fbcsrHybCUDA.cu fbcsrHybCUDA.cu ${TESTLIB_FILES} ${LIB_FILES})
-target_link_libraries(fbcsrHybCUDA.cu cudalib ${CUDA_cusparse_LIBRARY})
+cuda_add_executable(fbcsrHybCUDA fbcsrHybCUDA.cu ${TESTLIB_FILES} ${LIB_FILES})
+target_link_libraries(fbcsrHybCUDA cudalib ${CUDA_cusparse_LIBRARY})
 
 cuda_add_executable(fbcsrCUDA fbcsrCUDA.cu ${TESTLIB_FILES} ${LIB_FILES})
 target_link_libraries(fbcsrCUDA cudalib ${CUDA_cusparse_LIBRARY})

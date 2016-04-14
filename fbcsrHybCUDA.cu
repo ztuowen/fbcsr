@@ -98,7 +98,7 @@ int main(int argc, char **argv) {
         fbcsr_makeEmpty(f, c.n, c.m, 1, 32, 32, (void *) fbcsr_col_krnl_32, (void *) fbcsr_column);
         cul = list_add(cul, f);
 
-        rem = csr_fbcsr(&c, l, 0.3);
+        rem = csr_fbcsr(&c, l, 0.4);
 
         vector_memCpy(&vec, &cuv, cpyHostToDevice);
         vector_memCpy(&res, &cur, cpyHostToDevice);
@@ -131,7 +131,7 @@ int main(int argc, char **argv) {
             if (opt == 1)
                 printf("%f\n", eltime / TOTALRUNS);
             else
-                printf("%f\n", c.nnz / (eltime * (1000000 / TOTALRUNS)));
+                printf("%f\n", 2 * c.nnz / (eltime * (1000000 / TOTALRUNS)));
         } else {
             float cnt = 0;
             list *ll = l;
@@ -141,7 +141,7 @@ int main(int argc, char **argv) {
                 printf("%d\t", f->nnz);
                 ll = list_next(ll);
             }
-            printf("%f\t%f\n", cnt, cnt / c.nnz);
+            printf("%f\t%f\n", cnt, cnt / c.nnz * 100);
         }
         vector_memCpy(&res, &cur, cpyHostToDevice);
 
@@ -153,7 +153,6 @@ int main(int argc, char **argv) {
 
         if (!vector_equal(&ref, &res)) {
             fprintf(stderr, "Result mismatch\n");
-            return -1;
         }
 
         cudaEventDestroy(st);
@@ -166,6 +165,9 @@ int main(int argc, char **argv) {
         vector_CUDA_destroy(&cuv);
         vector_CUDA_destroy(&cur);
         list_destroy(cul, fbcsr_CUDA_destroy);
+        cusparseDestroy(handle);
+        cusparseDestroyMatDescr(descr);
+        cusparseDestroyHybMat(hybMat);
     }
     csr_destroy(&c);
     vector_destroy(&vec);

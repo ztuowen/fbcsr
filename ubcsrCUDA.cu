@@ -7,6 +7,7 @@
 #include"CSR.h"
 #include"UBCSR.h"
 
+#define TOTALRUNS 1000
 
 typedef void (*testFunc)(void);
 
@@ -15,17 +16,17 @@ int main(int argc, char **argv) {
         fprintf(stderr, "USAGE: %s <matrix.csr> <opt>", argv[0]);
         return -1;
     }
-    int opt = 0;
+    int opt = 1;
     if (argc > 2)
         switch (argv[2][0]) {
             case 'd':
-                opt = 1;
+                opt = 0;
                 break;
             case 'g':
                 opt = 2;
                 break;
             default:
-                opt = 0;
+                opt = 1;
         }
     csr c;
     vector vec;
@@ -96,34 +97,40 @@ int main(int argc, char **argv) {
         csr_memCpy(rem, &curem, cpyHostToDevice);
         ubcsr_memCpy(l, cul, cpyHostToDevice);
 
-        cudaEventRecord(st, 0);
-
-        csr_CUDA_SpMV(&curem, &cuv, &cur);
-        ubcsr_CUDA_SpMV(cul, &cuv, &cur);
-
-        cudaEventRecord(ed, 0);
-        cudaEventSynchronize(ed);
-        cudaEventElapsedTime(&eltime, st, ed);
         if (opt) {
+            cudaEventRecord(st, 0);
+            for (int i = 0; i < TOTALRUNS; ++i) {
+                csr_CUDA_SpMV(&curem, &cuv, &cur);
+                ubcsr_CUDA_SpMV(cul, &cuv, &cur);
+            }
+            cudaEventRecord(ed, 0);
+            cudaEventSynchronize(ed);
+            cudaEventElapsedTime(&eltime, st, ed);
+
             if (opt == 1)
-                printf("%f\n", eltime);
+                printf("%f\n", eltime / TOTALRUNS);
             else
-                printf("%f\n", c.nnz / (eltime * 1000000));
+                printf("%f\n", 2 * c.nnz / (eltime * (1000000 / TOTALRUNS)));
         } else {
+            float cnt = 0;
             list *ll = l;
             while (ll != NULL) {
                 ubcsr *f = (ubcsr *) list_get(ll);
+                cnt += f->nnz;
                 printf("%d\t", f->nnz);
                 ll = list_next(ll);
             }
-            printf("\n");
+            printf("%f\t%f\n", cnt, cnt / c.nnz * 100);
         }
+        vector_memCpy(&res, &cur, cpyHostToDevice);
+
+        csr_CUDA_SpMV(&curem, &cuv, &cur);
+        ubcsr_CUDA_SpMV(cul, &cuv, &cur);
 
         vector_destroy(&res);
         vector_memCpy(&cur, &res, cpyDeviceToHost);
 
         if (!vector_equal(&ref, &res))
-            return -1;
 
         cudaEventDestroy(st);
         cudaEventDestroy(ed);
