@@ -6,7 +6,7 @@
 #include<time.h>
 
 elem_t default_random(void) {
-    return (elem_t) rand() / RAND_MAX;
+    return 1 + (elem_t) rand() / RAND_MAX;
 }
 
 void vector_gen_random(vector *v, int n, elem_t (*random)(void)) {

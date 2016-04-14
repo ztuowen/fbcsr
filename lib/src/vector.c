@@ -8,7 +8,7 @@ int floatEqual(elem_t a, elem_t b) {
 
     if (a == b) { // shortcut, handles infinities
         return 1;
-    } else if ((a == 0 || b == 0) && diff < FLOAT_PREC)
+    } else if ((absA + absB < FLOAT_PREC) && diff < FLOAT_PREC)
         return 1;
     else if (diff / (absA + absB) < FLOAT_PREC)
         return 1;
@@ -20,6 +20,7 @@ int vector_equal(vector *a, vector *b) {
     int i;
     for (i = 0; i < a->n; ++i)
         if (!floatEqual(a->val[i], b->val[i])) {
+            fprintf(stderr, "Not Equal: %f %f at %d", a->val[i], b->val[i], i);
             return 0;
         }
     return 1;

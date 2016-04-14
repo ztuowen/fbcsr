@@ -299,6 +299,7 @@ csr *fbcsr_csr_splitOnce(csr *c, fbcsr *f, float thresh) {
             if (sel[row] == 1)
                 f->rptr[r++] = row;
     }
+    free(sel);
     // Now we have how many columns and how many rows that it has.
     f->val = malloc(f->nelem * f->nb * sizeof(elem_t));
     f->bindx = malloc(f->nb * sizeof(int));
