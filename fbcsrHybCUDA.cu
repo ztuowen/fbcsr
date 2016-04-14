@@ -7,6 +7,7 @@
 #include"CSR.h"
 #include"FBCSR.h"
 #include"FBCSR_krnl.h"
+#include<cusparse.h>
 
 #define TOTALRUNS 1000
 
@@ -103,11 +104,24 @@ int main(int argc, char **argv) {
         vector_memCpy(&res, &cur, cpyHostToDevice);
         csr_memCpy(rem, &curem, cpyHostToDevice);
         fbcsr_memCpy(l, cul, cpyHostToDevice);
+        cusparseMatDescr_t descr = 0;
+        cusparseHandle_t handle = 0;
+        cusparseCreateMatDescr(&descr);
+        cusparseSetMatType(descr, CUSPARSE_MATRIX_TYPE_GENERAL);
+        cusparseSetMatIndexBase(descr, CUSPARSE_INDEX_BASE_ZERO);
+        cusparseCreate(&handle);
+        cusparseHybMat_t hybMat;
+        cusparseHybPartition_t hybPart = CUSPARSE_HYB_PARTITION_AUTO;
+        cusparseCreateHybMat(&hybMat);
+
+        float unit = 1;
+        cusparseScsr2hyb(handle, curem.n, curem.m, descr, curem.val, curem.ptr, curem.indx, hybMat, 0, hybPart);
+
 
         if (opt) {
             cudaEventRecord(st, 0);
             for (int i = 0; i < TOTALRUNS; ++i) {
-                csr_CUDA_SpMV(&curem, &cuv, &cur);
+                cusparseShybmv(handle, CUSPARSE_OPERATION_NON_TRANSPOSE, &unit, descr, hybMat, cuv.val, &unit, cur.val);
                 fbcsr_CUDA_SpMV(cul, &cuv, &cur);
             }
             cudaEventRecord(ed, 0);
@@ -131,7 +145,7 @@ int main(int argc, char **argv) {
         }
         vector_memCpy(&res, &cur, cpyHostToDevice);
 
-        csr_CUDA_SpMV(&curem, &cuv, &cur);
+        cusparseShybmv(handle, CUSPARSE_OPERATION_NON_TRANSPOSE, &unit, descr, hybMat, cuv.val, &unit, cur.val);
         fbcsr_CUDA_SpMV(cul, &cuv, &cur);
 
         vector_destroy(&res);
