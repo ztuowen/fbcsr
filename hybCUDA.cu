@@ -77,7 +77,7 @@ int main(int argc, char **argv) {
             if (opt == 1)
                 printf("%f\n", eltime / TOTALRUNS);
             else
-                printf("%f\n", c.nnz / (eltime * 2000));
+                printf("%f\n", c.nnz / (eltime * (1000000 / TOTALRUNS)));
             cudaEventDestroy(st);
             cudaEventDestroy(ed);
         }
