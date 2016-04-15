@@ -236,7 +236,6 @@ void SpMV_CUDA_fbcsr() {
     vector_destroy(&res);
     vector_memCpy(&cur, &res, cpyDeviceToHost);
 
-    assert((vector_equal(ref, &res)));
     if (!vector_equal(ref, &res))
         fprintf(stderr, "Result mismatch!\n");
 
@@ -287,7 +286,8 @@ void trans_ubcsr() {
     ubcsr_csr(l, rem, nc);
     csr_SpMV(nc, vec, res);
 
-    assert((vector_equal(ref, res)));
+    if (!vector_equal(ref, res))
+        fprintf(stderr, "Result mismatch!\n");
 
     list_destroy(l, ubcsr_destroy);
     csr_destroy(nc);
@@ -313,7 +313,8 @@ void trans_fbcsr() {
     rem = csr_fbcsr(c, l);
     fbcsr_csr(l, rem, nc);
     csr_SpMV(nc, vec, res);
-    assert((vector_equal(ref, res)));
+    if (!vector_equal(ref, res))
+        fprintf(stderr, "Result mismatch!\n");
 
     list_destroy(l, fbcsr_destroy);
     csr_destroy(nc);
@@ -333,7 +334,8 @@ void timing() {
     GET_TIME(e);
     msec = elapsed_time_msec(&b, &e, &sec, &nsec);
     // Allow some uncertainty for sleep
-    assert(fabs(msec - 1000) < 10);
+    if ((fabs(msec - 1000) > 10))
+        fprintf(stderr, "Result mismatch!\n");
 }
 
 char *tNames[] = {
