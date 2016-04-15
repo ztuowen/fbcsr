@@ -7,6 +7,7 @@
 #include"CSR.h"
 #include"FBCSR.h"
 #include"FBCSR_krnl.h"
+#include "testlib/fix_csr.h"
 #include<cusparse.h>
 
 #define TOTALRUNS 1000
@@ -35,6 +36,7 @@ int main(int argc, char **argv) {
     vector ref;
 
     csr_readFile(argv[1], &c);
+    fix_csr(&c);
     vector_gen_random(&vec, c.m, NULL);
     vector_init(&ref, c.n);
 

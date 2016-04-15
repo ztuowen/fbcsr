@@ -29,7 +29,9 @@ set(LIB_CUDA
         lib/cuda/FBCSR.cu
         lib/cuda/FBCSR_krnl.cu)
 
-set(TESTLIB_FILES testlib/src/vector_gen.c)
+set(TESTLIB_FILES
+        testlib/src/fix_csr.c
+        testlib/src/vector_gen.c)
 
 include_directories(lib)
 cuda_add_library(cudalib ${LIB_CUDA} ${LIB_FILES})

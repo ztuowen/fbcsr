@@ -5,7 +5,6 @@
 //
 
 #include"prefix.h"
-#include"testlib/test_prefix.h"
 #include"testlib/vector_gen.h"
 #include"CSR.h"
 #include"VBR.h"

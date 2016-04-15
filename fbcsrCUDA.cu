@@ -5,6 +5,7 @@
 #include"prefix.h"
 #include"testlib/vector_gen.h"
 #include"CSR.h"
+#include"testlib/fix_csr.h"
 #include"FBCSR.h"
 #include"FBCSR_krnl.h"
 
@@ -34,6 +35,7 @@ int main(int argc, char **argv) {
     vector ref;
 
     csr_readFile(argv[1], &c);
+    fix_csr(&c);
     vector_gen_random(&vec, c.m, NULL);
     vector_init(&ref, c.n);
 
