@@ -6,7 +6,8 @@
 #include<string.h>
 
 #define MAXCOL 1048576
-#define CUTOFF 0.1
+#define CUTOFF_P 0.1
+#define CUTOFF_N 80000
 
 void fbcsr_makeEmpty(fbcsr *f, int n, int m, int c, int r, int nelem, float thresh, void *optKrnl, void *getCoo) {
     f->n = n;
@@ -284,7 +285,7 @@ csr *fbcsr_csr_splitOnce(csr *c, fbcsr *f, float thresh) {
         ids[row] = row;
     sel = bestseq(rowsc, ids, c->n, f->n, f->r, &tot);
     int r;
-    if (CUTOFF * c->nnz > sel[c->n]) { //
+    if (CUTOFF_N > sel[c->n] || c->nnz * CUTOFF_P > sel[c->n]) { //
         f->nr = 0;
         f->nb = 0;
         f->rptr = malloc((f->nr) * sizeof(int));
