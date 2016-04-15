@@ -72,7 +72,7 @@ int main(int argc, char **argv) {
         cudaEventCreate(&ed);
         vector_init(&res, c.n);
         f = (fbcsr *) malloc(sizeof(fbcsr));
-        fbcsr_makeEmpty(f, c.n, c.m, 32, 1, 32, 0.5, NULL, (void *) fbcsr_row);
+        fbcsr_makeEmpty(f, c.n, c.m, 32, 1, 32, 0.4, NULL, (void *) fbcsr_row);
         l = list_add(l, f);
         f = (fbcsr *) malloc(sizeof(fbcsr));
         fbcsr_makeEmpty(f, c.n, c.m, 1, 32, 32, 0.4, NULL, (void *) fbcsr_backwardSlash);
@@ -85,7 +85,7 @@ int main(int argc, char **argv) {
         l = list_add(l, f);
 
         f = (fbcsr *) malloc(sizeof(fbcsr));
-        fbcsr_makeEmpty(f, c.n, c.m, 32, 1, 32, 0.5, (void *) fbcsr_row_krnl_32, (void *) fbcsr_row);
+        fbcsr_makeEmpty(f, c.n, c.m, 32, 1, 32, 0.4, (void *) fbcsr_row_krnl_32, (void *) fbcsr_row);
         cul = list_add(cul, f);
         f = (fbcsr *) malloc(sizeof(fbcsr));
         fbcsr_makeEmpty(f, c.n, c.m, 1, 32, 32, 0.4, (void *) fbcsr_bslash_krnl_32, (void *) fbcsr_backwardSlash);
