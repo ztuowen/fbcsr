@@ -27,6 +27,8 @@ void fbcsr_bslash_krnl_16(fbcsr *f, vector *v, vector *r);
 
 void fbcsr_bslash_krnl_32(fbcsr *f, vector *v, vector *r);
 
+void fbcsr_square_krnl(fbcsr *f, vector *v, vector *r);
+
 #ifdef __cplusplus
 }
 #endif

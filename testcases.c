@@ -89,6 +89,9 @@ void SpMV_fbcsr() {
     f = (fbcsr *) malloc(sizeof(fbcsr));
     fbcsr_makeEmpty(f, c->n, c->m, 1, 16, 16, 0.5, NULL, fbcsr_backwardSlash);
     l = list_add(l, f);
+    f = (fbcsr *) malloc(sizeof(fbcsr));
+    fbcsr_makeEmpty(f, c->n, c->m, 32, 32, 1024, 0.3, NULL, (void *) fbcsr_square);
+    l = list_add(l, f);
 
     rem = csr_fbcsr(c, l);
 

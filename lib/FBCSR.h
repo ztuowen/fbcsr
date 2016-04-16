@@ -49,6 +49,8 @@ coo fbcsr_forwardSlash(int elemIndx, int elemCnt);
 
 coo fbcsr_backwardSlash(int elemIndx, int elemCnt);
 
+coo fbcsr_square(int elemIndx, int elemCnt);
+
 csr *csr_fbcsr(csr *c, list *l);    // c,r information embedded in list of ubcsr
 // Easier to just return the remainder, TODO it is against convention
 void fbcsr_csr(list *l, csr *rem, csr *c);

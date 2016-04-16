@@ -49,6 +49,13 @@ coo fbcsr_backwardSlash(int elemIndx, int elemCnt) {
     return c;
 }
 
+coo fbcsr_square(int elemIndx, int elemCnt) {
+    coo c;
+    c.c = elemIndx / 32;
+    c.r = elemIndx % 32;
+    return c;
+}
+
 int *bestseq(int *score, int *ids, int n, int maxn, int con, int *tot) {
     int i;
     int *sel;
@@ -265,6 +272,10 @@ csr *fbcsr_csr_splitOnce(csr *c, fbcsr *f, float thresh) {
                 coo pos = getCoo(idx, f->nelem);
                 pos.r += row;
                 pos.c += col;
+                if (pos.c >= f->m || pos.r >= f->n || pos.c < 0 || pos.r < 0) {
+                    cnt = 0;
+                    break;
+                }
                 if (csr_lookFor(c, pos, &findidx[pos.r - row], &mincol, minidx[pos.r - row]))
                     ++cnt;
             }

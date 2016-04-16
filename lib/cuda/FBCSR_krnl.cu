@@ -70,6 +70,7 @@ __global__ void FBCSR_general_krnl(fbcsr f, vector v, vector r) {
                 red[me][idx] += red[me + tot][idx];
                 __syncthreads();
             }
+            __syncthreads();
             if (me == 0) {
                 //atomicAdd(&r.val[rr], red[0][nrow]);
                 r.val[rr] += red[0][nrow];
@@ -200,6 +201,31 @@ __global__ void FBCSR_row_nred_krnl(fbcsr f, vector v, vector r) {
     }
 };
 
+template< int blockSize
+> __global__ void FBCSR_square_krnl(fbcsr f, vector v, vector r) {
+    int me = threadIdx.x / 32;
+    int idx = threadIdx.x % 32;
+    __shared__ elem_t tmp[blockSize / 32][32];
+    elem_t acc = 0;
+    for (int i = f.bptr[blockIdx.x] + me; i < f.bptr[blockIdx.x + 1]; i += blockSize / 32) {
+        int offset = i * f.nelem;
+        // read vector
+        tmp[me][idx] = v.val[f.bindx[i] + idx];
+
+        for (int j = 0; j < 32; ++j, offset += 32)
+            acc += tmp[me][j] * f.val[offset + idx];
+    }
+    tmp[me][idx] = acc;
+    if (blockSize > 32)
+        __syncthreads();
+    if (me == 0) {
+        for (int i = 1; i < blockSize / 32; ++i)
+            acc += tmp[i][idx];
+        int rr = f.rptr[blockIdx.x];
+        r.val[rr + idx] += acc;
+    }
+}
+
 extern "C" void fbcsr_row_krnl_16(fbcsr *f, vector *v, vector *r) {
     if (f->nnz / f->nr > 512) {
         dim3 block(f->nr), thread(128);
@@ -298,3 +324,10 @@ extern "C" void fbcsr_bslash_krnl_32(fbcsr *f, vector *v, vector *r) {
     }
 }
 
+
+extern "C" void fbcsr_square_krnl(fbcsr *f, vector *v, vector *r) {
+    {
+        dim3 block(f->nr), thread(128);
+        FBCSR_square_krnl < 128 ><<<block, thread>>>(*f, *v, *r);
+    }
+}
