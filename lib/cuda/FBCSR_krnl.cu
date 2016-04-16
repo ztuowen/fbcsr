@@ -326,7 +326,16 @@ extern "C" void fbcsr_bslash_krnl_32(fbcsr *f, vector *v, vector *r) {
 
 
 extern "C" void fbcsr_square_krnl(fbcsr *f, vector *v, vector *r) {
-    {
+    if (f->nb / f->nr > 128) {
+        dim3 block(f->nr), thread(1024);
+        FBCSR_square_krnl < 1024 ><<<block, thread>>>(*f, *v, *r);
+    } else if (f->nb / f->nr > 64) {
+        dim3 block(f->nr), thread(512);
+        FBCSR_square_krnl < 512 ><<<block, thread>>>(*f, *v, *r);
+    } else if (f->nb / f->nr > 32) {
+        dim3 block(f->nr), thread(256);
+        FBCSR_square_krnl < 256 ><<<block, thread>>>(*f, *v, *r);
+    } else {
         dim3 block(f->nr), thread(128);
         FBCSR_square_krnl < 128 ><<<block, thread>>>(*f, *v, *r);
     }

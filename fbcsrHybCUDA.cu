@@ -75,19 +75,19 @@ int main(int argc, char **argv) {
         cudaEventCreate(&ed);
         vector_init(&res, c.n);
         f = (fbcsr *) malloc(sizeof(fbcsr));
-        fbcsr_makeEmpty(f, c.n, c.m, 32, 1, 32, 0.4, NULL, (void *) fbcsr_row);
+        fbcsr_makeEmpty(f, c.n, c.m, 32, 1, 32, 0.6, NULL, (void *) fbcsr_row);
         l = list_add(l, f);
         f = (fbcsr *) malloc(sizeof(fbcsr));
-        fbcsr_makeEmpty(f, c.n, c.m, 1, 32, 32, 0.4, NULL, (void *) fbcsr_backwardSlash);
+        fbcsr_makeEmpty(f, c.n, c.m, 1, 32, 32, 0.6, NULL, (void *) fbcsr_backwardSlash);
         l = list_add(l, f);
         f = (fbcsr *) malloc(sizeof(fbcsr));
-        fbcsr_makeEmpty(f, c.n, c.m, 1, 32, 32, 0.4, NULL, (void *) fbcsr_forwardSlash);
+        fbcsr_makeEmpty(f, c.n, c.m, 1, 32, 32, 0.6, NULL, (void *) fbcsr_forwardSlash);
         l = list_add(l, f);
         f = (fbcsr *) malloc(sizeof(fbcsr));
-        fbcsr_makeEmpty(f, c.n, c.m, 1, 32, 32, 0.3, NULL, (void *) fbcsr_column);
+        fbcsr_makeEmpty(f, c.n, c.m, 1, 32, 32, 0.6, NULL, (void *) fbcsr_column);
         l = list_add(l, f);
         f = (fbcsr *) malloc(sizeof(fbcsr));
-        fbcsr_makeEmpty(f, c.n, c.m, 32, 32, 1024, 0.3, NULL, (void *) fbcsr_square);
+        fbcsr_makeEmpty(f, c.n, c.m, 32, 32, 1024, 0.4, NULL, (void *) fbcsr_square);
         l = list_add(l, f);
 
         f = (fbcsr *) malloc(sizeof(fbcsr));
@@ -103,7 +103,7 @@ int main(int argc, char **argv) {
         fbcsr_makeEmpty(f, c.n, c.m, 1, 32, 32, 0.6, (void *) fbcsr_col_krnl_32, (void *) fbcsr_column);
         cul = list_add(cul, f);
         f = (fbcsr *) malloc(sizeof(fbcsr));
-        fbcsr_makeEmpty(f, c.n, c.m, 32, 32, 1024, 0.3, (void *) fbcsr_square_krnl, (void *) fbcsr_square);
+        fbcsr_makeEmpty(f, c.n, c.m, 32, 32, 1024, 0.4, (void *) fbcsr_square_krnl, (void *) fbcsr_square);
         cul = list_add(cul, f);
 
         rem = csr_fbcsr(&c, l);
