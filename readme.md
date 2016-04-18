@@ -13,6 +13,7 @@
 # File structure
 
 * **lib/** libs for different matrix representations
+    * **cuda/** cuda related implementations
     * **src/** implementations
     * **prefix.h** global definitions and helpers
     * **list.h** list structure for c
@@ -26,8 +27,13 @@
     * **vector_gen.h** Random vector generator
 * **CMakeLists.txt** CMake makefile
 * **testcases.c** Some coherency tests
+* **csrCUDA.cu** cuSPARSE CSR
+* **hybCUDA.cu** cuSPARSE HYB
+* **fbcsrCUDA.cu**
+* **fbcsrHybCUDA.cu** FBCSR with leftover using HYB
+* **ubcsrCUDA.cu**
 * **readme.md** This file
-* **cudaSample.cu** A simple device query CUDA sample to showcase the build system for CUDA
+* **kernel.cu** How to implement a custom kernel
 
 ## Guidelines
 
@@ -47,6 +53,7 @@
     * will be disabled `#ifndef DEBUG`
     * will be disabled when building as Release
 
-# Using CUDA
+**To implement a custom kernel**
 
-Check `cudaSample.cu` & `CMakeLists.txt`
+**SEE kernel.md**
+
