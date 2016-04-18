@@ -378,7 +378,7 @@ int main(int argc, char **argv) {
     ref = (vector *) malloc(sizeof(vector));
 
     csr_readFile(argv[1], c);
-    vector_gen_random(vec, c->m, NULL);
+    vector_gen(vec, c->m, NULL);
     vector_init(ref, c->n);
     int i = 0;
     while (tNames[i] != NULL) {

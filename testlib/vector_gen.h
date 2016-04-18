@@ -12,7 +12,7 @@
 extern "C" {
 #endif
 
-void vector_gen_random(vector *v, int n, elem_t (*random)(void));
+void vector_gen(vector *v, int n, elem_t (*random)(void));
 
 #ifdef __cplusplus
 }

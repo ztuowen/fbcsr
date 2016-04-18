@@ -35,7 +35,7 @@ int main(int argc, char **argv) {
 
     csr_readFile(argv[1], &c);
     fix_csr(&c);
-    vector_gen_random(&vec, c.m, NULL);
+    vector_gen(&vec, c.m, NULL);
     vector_init(&ref, c.n);
 
     // Make reference

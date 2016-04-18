@@ -31,7 +31,8 @@ set(LIB_CUDA
 
 set(TESTLIB_FILES
         testlib/src/fix_csr.c
-        testlib/src/vector_gen.c)
+        testlib/src/vector_gen.c
+        testlib/src/fbcsr_gen.c)
 
 include_directories(lib)
 cuda_add_library(cudalib ${LIB_CUDA} ${LIB_FILES})
@@ -50,6 +51,9 @@ target_link_libraries(hybCUDA cudalib ${CUDA_cusparse_LIBRARY})
 
 cuda_add_executable(fbcsrHybCUDA fbcsrHybCUDA.cu ${TESTLIB_FILES} ${LIB_FILES})
 target_link_libraries(fbcsrHybCUDA cudalib ${CUDA_cusparse_LIBRARY})
+
+cuda_add_executable(fbcsrShapes fbcsrShapes.cu ${TESTLIB_FILES} ${LIB_FILES})
+target_link_libraries(fbcsrShapes cudalib ${CUDA_cusparse_LIBRARY})
 
 cuda_add_executable(fbcsrCUDA fbcsrCUDA.cu ${TESTLIB_FILES} ${LIB_FILES})
 target_link_libraries(fbcsrCUDA cudalib ${CUDA_cusparse_LIBRARY})
