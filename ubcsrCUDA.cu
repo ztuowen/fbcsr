@@ -26,6 +26,9 @@ int main(int argc, char **argv) {
             case 'g':
                 opt = 2;
                 break;
+            case 'b':
+                opt = 3;
+                break;
             default:
                 opt = 1;
         }
@@ -108,11 +111,32 @@ int main(int argc, char **argv) {
             cudaEventRecord(ed, 0);
             cudaEventSynchronize(ed);
             cudaEventElapsedTime(&eltime, st, ed);
-
-            if (opt == 1)
-                printf("%f\n", eltime / TOTALRUNS);
-            else
-                printf("%f\n", 2 * c.nnz / (eltime * (1000000 / TOTALRUNS)));
+            float cnt = 0;
+            list *ll = l;
+            while (ll != NULL) {
+                ubcsr *f = (ubcsr *) list_get(ll);
+                cnt += f->nr * sizeof(int) * 3; // rptr bptr
+                cnt += f->nb * sizeof(int); // bindx
+                cnt += f->nb * f->c * (f->r + 1) * sizeof(elem_t); // val vec
+                cnt += f->nb * f->r * sizeof(elem_t) * 2; // y[i]+=
+                ll = list_next(ll);
+            }
+            cnt += 2 * sizeof(int) * rem->n;     // row pointer
+            cnt += 1 * sizeof(int) * rem->nnz; // column index
+            cnt += 2 * sizeof(elem_t) * rem->nnz; // A[i,j] and x[j]
+            cnt += 2 * sizeof(elem_t) * rem->n;
+            switch (opt) {
+                case 1:
+                default:
+                    printf("%f\n", eltime / TOTALRUNS);
+                    break;
+                case 2:
+                    printf("%f\n", 2 * c.nnz / (eltime * (1000000 / TOTALRUNS)));
+                    break;
+                case 3:
+                    printf("%f\n", cnt / (eltime * (1000000 / TOTALRUNS)));
+                    break;
+            }
         } else {
             float cnt = 0;
             list *ll = l;

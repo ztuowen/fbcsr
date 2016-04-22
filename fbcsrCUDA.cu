@@ -130,13 +130,17 @@ int main(int argc, char **argv) {
                 fbcsr *f = (fbcsr *) list_get(ll);
                 cnt += f->nr * sizeof(int) * 3; // rptr bptr
                 cnt += f->nb * sizeof(int); // bindx
-                if (f->optKernel == fbcsr_square)
+                if (f->optKernel == (void *) fbcsr_square_krnl)
                     cnt += f->nb * f->nelem * sizeof(elem_t) + f->nb * 32 * sizeof(elem_t); // val vec
                 else
                     cnt += f->nb * f->nelem * 2 * sizeof(elem_t); // val vec
-                cnt += f->n * sizeof(elem_t) * 2; // y[i]+=
+                cnt += f->nb * f->r * sizeof(elem_t) * 2; // y[i]+=
                 ll = list_next(ll);
             }
+            cnt += 2 * sizeof(int) * rem->n;     // row pointer
+            cnt += 1 * sizeof(int) * rem->nnz; // column index
+            cnt += 2 * sizeof(elem_t) * rem->nnz; // A[i,j] and x[j]
+            cnt += 2 * sizeof(elem_t) * rem->n;
             switch (opt) {
                 case 1:
                 default:

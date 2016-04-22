@@ -63,7 +63,7 @@ int main(int argc, char **argv) {
             cudaEventRecord(ed, 0);
             cudaEventSynchronize(ed);
             cudaEventElapsedTime(&eltime, st, ed);
-            float cnt;
+            float cnt = 0;
 
             cnt += 2 * sizeof(int) * c.n;     // row pointer
             cnt += 1 * sizeof(int) * c.nnz; // column index
