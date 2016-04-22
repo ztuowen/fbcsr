@@ -26,6 +26,9 @@ int main(int argc, char **argv) {
             case 'g':
                 opt = 2;
                 break;
+            case 'b':
+                opt = 3;
+                break;
             default:
                 opt = 1;
         }
@@ -60,11 +63,25 @@ int main(int argc, char **argv) {
             cudaEventRecord(ed, 0);
             cudaEventSynchronize(ed);
             cudaEventElapsedTime(&eltime, st, ed);
+            float cnt;
 
-            if (opt == 1)
-                printf("%f\n", eltime / TOTALRUNS);
-            else
-                printf("%f\n", 2 * c.nnz / (eltime * (1000000 / TOTALRUNS)));
+            cnt += 2 * sizeof(int) * c.n;     // row pointer
+            cnt += 1 * sizeof(int) * c.nnz; // column index
+            cnt += 2 * sizeof(elem_t) * c.nnz; // A[i,j] and x[j]
+            cnt += 2 * sizeof(elem_t) * c.n;
+
+            switch (opt) {
+                case 1:
+                default:
+                    printf("%f\n", eltime / TOTALRUNS);
+                    break;
+                case 2:
+                    printf("%f\n", 2 * c.nnz / (eltime * (1000000 / TOTALRUNS)));
+                    break;
+                case 3:
+                    printf("%f\n", cnt / (eltime * (1000000 / TOTALRUNS)));
+                    break;
+            }
             cudaEventDestroy(st);
             cudaEventDestroy(ed);
         }
