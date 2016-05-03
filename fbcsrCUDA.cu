@@ -132,6 +132,8 @@ int main(int argc, char **argv) {
                 cnt += f->nb * sizeof(int); // bindx
                 if (f->optKernel == (void *) fbcsr_square_krnl)
                     cnt += f->nb * f->nelem * sizeof(elem_t) + f->nb * 32 * sizeof(elem_t); // val vec
+                else if (f->optKernel == (void *) fbcsr_col_krnl_32)
+                    cnt += f->nb * (f->nelem + 1) * sizeof(elem_t); // val vec
                 else
                     cnt += f->nb * f->nelem * 2 * sizeof(elem_t); // val vec
                 cnt += f->nb * f->r * sizeof(elem_t) * 2; // y[i]+=
