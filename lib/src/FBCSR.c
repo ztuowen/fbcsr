@@ -60,23 +60,23 @@ int *bestseq(int *score, int *ids, int n, int maxn, int con, int *tot) {
     int i;
     int *sel;
     int nxt;
-    sel = malloc((n+1)*sizeof(int));
-    memset(sel,0,(n+1)*sizeof(int));
+    sel = malloc((n + 1) * sizeof(int));
+    memset(sel, 0, (n + 1) * sizeof(int));
     nxt = 0;
     ids[n] = maxn;
-    for (i=0;i<n;++i) {
+    for (i = 0; i < n; ++i) {
         while (nxt <= n && ids[nxt] < ids[i] + con)
             ++nxt;
         if (nxt <= n)
             sel[nxt] = max(sel[nxt], sel[i] + score[i]);
-        sel[i+1] = max(sel[i+1],sel[i]);
+        sel[i + 1] = max(sel[i + 1], sel[i]);
     }
     i = n;
     int sc = sel[n];
     int li = n;
     nxt = n - 1;
     int lstp = maxn - con;
-    *tot=0;
+    *tot = 0;
     while (nxt >= 0) {
         while (nxt > 0 && ids[nxt] > lstp)
             --nxt;
@@ -90,8 +90,8 @@ int *bestseq(int *score, int *ids, int n, int maxn, int con, int *tot) {
         } else
             --nxt;
     }
-    while (li>0)
-        sel[--li]=0;
+    while (li > 0)
+        sel[--li] = 0;
     return sel;
 }
 
@@ -233,12 +233,12 @@ int csr_lookFor(csr *c, coo pos, int *last, int *mincol, int colcor) {
 csr *fbcsr_csr_splitOnce(csr *c, fbcsr *f, float thresh) {
     fbcsr_getCoo getCoo = (fbcsr_getCoo) f->getCoo;
     int row, col, idx, vcnt, cnt;
-    int *findidx;
+    int *findidxfst, *findidxlst;
     int *minidx;
     int *sel;
     int tot;
-    int *rowsc = malloc(f->m*sizeof(int));
-    int *colsc = malloc(f->n*sizeof(int));
+    int *rowsc = malloc(f->m * sizeof(int));
+    int *colsc = malloc(f->n * sizeof(int));
     int *ids = malloc((max(f->m, f->n) + 1) * sizeof(int));
     int *rowbk = malloc(f->n * sizeof(int));
     csr *last = malloc(sizeof(csr));
@@ -247,7 +247,8 @@ csr *fbcsr_csr_splitOnce(csr *c, fbcsr *f, float thresh) {
     f->n = c->n;
     f->m = c->m;
 
-    findidx = malloc(f->r * sizeof(int));
+    findidxfst = malloc(f->r * sizeof(int));
+    findidxlst = malloc(f->r * sizeof(int));
     minidx = malloc(f->r * sizeof(int));
     for (idx = 0; idx < f->r; ++idx)
         minidx[idx] = MAXCOL;
@@ -258,26 +259,30 @@ csr *fbcsr_csr_splitOnce(csr *c, fbcsr *f, float thresh) {
 
     // First we will inspect and get the total number of element registered
     int mincol;
-    memset(rowsc,0,f->m*sizeof(int));
+    memset(rowsc, 0, f->m * sizeof(int));
     for (row = 0; row < c->n; ++row) {
         // Here we use the simpler form that put the original kernel into the part
         // and assume that there is no contention in cols(we simply don't use row)
-        memset(colsc,0,f->n*sizeof(int));
-        memset(findidx, 0, f->r * sizeof(int));
+        memset(colsc, 0, f->n * sizeof(int));
+        memset(findidxfst, 0, f->r * sizeof(int));
+        memset(findidxlst, 0, f->r * sizeof(int));
         int selc = 0;
         for (col = 0; col < c->m;) {
             cnt = 0;
             mincol = MAXCOL;
-            for (idx = 0; idx < f->nelem; ++idx) {
-                coo pos = getCoo(idx, f->nelem);
-                pos.r += row;
-                pos.c += col;
-                if (pos.c >= f->m || pos.r >= f->n || pos.c < 0 || pos.r < 0) {
+            for (idx = 0; idx < f->r; ++idx) {
+                coo pos;
+                pos.r = idx + row;
+                pos.c = minidx[idx] + col;
+                if (pos.c + f->c >= f->m || pos.r >= f->n || pos.c < 0 || pos.r < 0) {
                     cnt = 0;
                     break;
                 }
-                if (csr_lookFor(c, pos, &findidx[pos.r - row], &mincol, minidx[pos.r - row]))
-                    ++cnt;
+                if (csr_lookFor(c, pos, &findidxfst[idx], &mincol, minidx[idx]))
+                    cnt = findidxfst[idx] - cnt;
+                pos.c += f->c;
+                if (csr_lookFor(c, pos, &findidxlst[idx], NULL, minidx[idx]))
+                    cnt = findidxlst[idx] - cnt;
             }
             if (cnt >= thresh * f->nelem) {
                 colsc[selc] = cnt;
@@ -321,18 +326,26 @@ csr *fbcsr_csr_splitOnce(csr *c, fbcsr *f, float thresh) {
     vcnt = 0;
     for (r = 0; r < f->nr; ++r) {
         row = f->rptr[r];
-        memset(findidx, 0, f->r * sizeof(int));
+        memset(findidxfst, 0, f->r * sizeof(int));
+        memset(findidxlst, 0, f->r * sizeof(int));
         memset(colsc, 0, f->n * sizeof(int));
         int selc = 0;
         for (col = 0; col < c->m;) {
             cnt = 0;
             mincol = MAXCOL;
-            for (idx = 0; idx < f->nelem; ++idx) {
-                coo pos = getCoo(idx, f->nelem);
-                pos.r += row;
-                pos.c += col;
-                if (csr_lookFor(c, pos, &findidx[pos.r - row], &mincol, minidx[pos.r - row]))
-                    ++cnt;
+            for (idx = 0; idx < f->r; ++idx) {
+                coo pos;
+                pos.r = idx + row;
+                pos.c = minidx[idx] + col;
+                if (pos.c + f->c >= f->m || pos.r >= f->n || pos.c < 0 || pos.r < 0) {
+                    cnt = 0;
+                    break;
+                }
+                if (csr_lookFor(c, pos, &findidxfst[idx], &mincol, minidx[idx]))
+                    cnt = findidxfst[idx] - cnt;
+                pos.c += f->c;
+                if (csr_lookFor(c, pos, &findidxlst[idx], NULL, minidx[idx]))
+                    cnt = findidxlst[idx] - cnt;
             }
             if (cnt >= thresh * f->nelem) {
                 colsc[selc] = cnt;
@@ -351,9 +364,9 @@ csr *fbcsr_csr_splitOnce(csr *c, fbcsr *f, float thresh) {
                     coo pos = getCoo(idx, f->nelem);
                     pos.r += row;
                     pos.c += col;
-                    if (csr_lookFor(c, pos, &findidx[pos.r - row], NULL, 0)) {
-                        last->val[findidx[pos.r - row]] = 0;
-                        f->val[cnt + idx] = c->val[findidx[pos.r - row]];
+                    if (csr_lookFor(c, pos, &findidxfst[pos.r - row], NULL, 0)) {
+                        last->val[findidxfst[pos.r - row]] = 0;
+                        f->val[cnt + idx] = c->val[findidxfst[pos.r - row]];
                     } else
                         f->val[cnt + idx] = 0;
                 }
@@ -380,6 +393,9 @@ csr *fbcsr_csr_splitOnce(csr *c, fbcsr *f, float thresh) {
     free(colsc);
     free(ids);
     free(rowbk);
+    free(findidxfst);
+    free(findidxlst);
+    free(minidx);
     return last;
 }
 
