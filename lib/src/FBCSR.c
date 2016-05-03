@@ -278,11 +278,10 @@ csr *fbcsr_csr_splitOnce(csr *c, fbcsr *f, float thresh) {
                     cnt = 0;
                     break;
                 }
-                if (csr_lookFor(c, pos, &findidxfst[idx], &mincol, minidx[idx]))
-                    cnt = findidxfst[idx] - cnt;
+                csr_lookFor(c, pos, &findidxfst[idx], &mincol, minidx[idx]);
                 pos.c += f->c;
-                if (csr_lookFor(c, pos, &findidxlst[idx], NULL, minidx[idx]))
-                    cnt = findidxlst[idx] - cnt;
+                csr_lookFor(c, pos, &findidxlst[idx], NULL, minidx[idx]);
+                cnt += findidxlst[idx] - findidxfst[idx];
             }
             if (cnt >= thresh * f->nelem) {
                 colsc[selc] = cnt;
@@ -341,11 +340,10 @@ csr *fbcsr_csr_splitOnce(csr *c, fbcsr *f, float thresh) {
                     cnt = 0;
                     break;
                 }
-                if (csr_lookFor(c, pos, &findidxfst[idx], &mincol, minidx[idx]))
-                    cnt = findidxfst[idx] - cnt;
+                csr_lookFor(c, pos, &findidxfst[idx], &mincol, minidx[idx]);
                 pos.c += f->c;
-                if (csr_lookFor(c, pos, &findidxlst[idx], NULL, minidx[idx]))
-                    cnt = findidxlst[idx] - cnt;
+                csr_lookFor(c, pos, &findidxlst[idx], NULL, minidx[idx]);
+                cnt += findidxlst[idx] - findidxfst[idx];
             }
             if (cnt >= thresh * f->nelem) {
                 colsc[selc] = cnt;
@@ -354,6 +352,7 @@ csr *fbcsr_csr_splitOnce(csr *c, fbcsr *f, float thresh) {
             col = mincol;
         }
         sel = bestseq(colsc, ids, selc, f->m, f->c, &tot);
+        memset(findidxfst, 0, f->r * sizeof(int));
         int cc;
         for (cc = 0; cc < selc; ++cc)
             if (sel[cc] == 1) {
@@ -375,7 +374,6 @@ csr *fbcsr_csr_splitOnce(csr *c, fbcsr *f, float thresh) {
         f->bptr[r + 1] = vcnt;
         free(sel);
     }
-    DEBUG_PRINT("Convert FBCSR: %d\n", vcnt * f->nelem);
     vcnt = 0;
     for (row = 0; row < last->n; ++row) {
         col = last->ptr[row];
@@ -389,6 +387,7 @@ csr *fbcsr_csr_splitOnce(csr *c, fbcsr *f, float thresh) {
     last->ptr[last->n] = vcnt;
     last->nnz = vcnt;
     f->nnz = c->nnz - last->nnz;
+    DEBUG_PRINT("Convert FBCSR \n\t - blocks: %d\n\t - fillrate: %f\n", f->nb, (float) f->nnz / f->nb / f->nelem);
     free(rowsc);
     free(colsc);
     free(ids);
